@@ -24,3 +24,26 @@ set(CXX_FLAGS
 -march=native
 -rdynamic
 )
+
+string(REPLACE ";" " " CMAKE_CXX_FLAGES "${CXX_FLAGS}")
+
+set(CMAKE_CXX_COMPILER "g++")
+set(CMAKE_CXX_FLAGS_DEBUG "-O0")
+set(CMAKE_CXX_FLAGS_RELEASE "-O2 -finline-limit=1000 -DNDEBUG")
+set(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin)
+set(LIBRARY_OUPUT_PATH ${PROJECT_BINARY_DIR}/lib) 
+message(STATUS "PROJECT_BINARY_DIR = " ${PROJECT_BINARY_DIR})
+
+find_package(Boost REQUIRED)
+
+include_directories(${Boost_INCLUDE_DIRS})
+
+include_directories(${PROJECT_SOURCE_DIR})
+message(STATUS "PROJECT_SOURCE_DIR = " ${PROJECT_SOURCE_DIR})
+
+string(TOUPPER ${CMAKE_BUILD_TYPE} BUILD_TYPE)
+message(STATUS "CXX_FAGS = " ${CMAKE_CXX_FLAGS} " " ${CMAKE_CXX_FLAGS_${BUILD_TYPE}})
+
+add_subdirectory(arale/base)
+add_subdirectory(arale/net)
+

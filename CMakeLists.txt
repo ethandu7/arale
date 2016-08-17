@@ -25,7 +25,7 @@ set(CXX_FLAGS
 -rdynamic
 )
 
-string(REPLACE ";" " " CMAKE_CXX_FLAGES "${CXX_FLAGS}")
+string(REPLACE ";" " " CMAKE_CXX_FLAGS "${CXX_FLAGS}")
 
 set(CMAKE_CXX_COMPILER "g++")
 set(CMAKE_CXX_FLAGS_DEBUG "-O0")
@@ -42,7 +42,7 @@ include_directories(${PROJECT_SOURCE_DIR})
 message(STATUS "PROJECT_SOURCE_DIR = " ${PROJECT_SOURCE_DIR})
 
 string(TOUPPER ${CMAKE_BUILD_TYPE} BUILD_TYPE)
-message(STATUS "CXX_FAGS = " ${CMAKE_CXX_FLAGS} " " ${CMAKE_CXX_FLAGS_${BUILD_TYPE}})
+message(STATUS "CXX_FLAGS = " ${CMAKE_CXX_FLAGS} " " ${CMAKE_CXX_FLAGS_${BUILD_TYPE}})
 
 add_subdirectory(arale/base)
 add_subdirectory(arale/net)

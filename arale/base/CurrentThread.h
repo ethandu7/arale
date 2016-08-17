@@ -2,7 +2,7 @@
 #ifndef ARALE_NET_CURRENTTHREAD_H
 #define ARALE_NET_CURRENTTHREAD_H
 
-#include <pthread>
+#include <pthread.h>
 
 
 namespace arale {

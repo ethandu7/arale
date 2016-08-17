@@ -1,15 +1,17 @@
 
 #include <arale/base/CurrentThread.h>
 #include <sys/syscall.h>
+#include <unistd.h>
 
-using namespace muduo;
-using namespace muduo::base;
 
-__thread int threadID = 0;
+using namespace arale;
+using namespace arale::base;
+
+__thread int arale::base::threadID = 0;
 
 inline int getCurrentThreadID() {
     if (threadID == 0) {
-        threadID = ::gettid();
+        threadID = syscall(SYS_gettid);
     }
     return threadID;
 }

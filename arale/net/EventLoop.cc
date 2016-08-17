@@ -6,7 +6,7 @@ using namespace arale;
 using namespace arale::net;
 
 EventLoop::EventLoop() :
-    threadID_(getCurrentThreadID())
+    threadID_(base::getCurrentThreadID())
 {
 
 }

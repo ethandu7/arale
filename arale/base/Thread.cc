@@ -4,15 +4,20 @@
 #include <unistd.h>
 
 
-using namespace arale;
-using namespace arale::base;
+namespace arale {
 
-__thread int arale::base::threadID = 0;
+namespace base {
 
-inline int getCurrentThreadID() {
+__thread pid_t threadID = 0;
+
+inline pid_t getCurrentThreadID() {
     if (threadID == 0) {
         threadID = syscall(SYS_gettid);
     }
     return threadID;
 }
+
+};
+
+};
 

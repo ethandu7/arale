@@ -3,7 +3,7 @@
 #define ARALE_NET_EVENTLOOP_H
 
 #include <sys/types.h>
-
+#include <arale/base/CurrentThread.h>
 
 
 namespace arale {
@@ -14,7 +14,18 @@ class EventLoop {
 public:
     EventLoop();
     ~EventLoop();
-    
+    EventLoop(const EventLoop&) = delete;
+    EventLoop& operator=(const EventLoop&) = delete;
+
+    bool isInLoopThread() {
+        return threadID_ == base::getCurrentThreadID();
+    }
+    void loop();
+
+    void assertInLoopThread() {
+        //if (!isInLoopThread())
+            
+    }
 private:
     const pid_t threadID_;
 

@@ -1,5 +1,10 @@
 set(base_SRCS
 Thread.cc
+Logging.cc
+LogStream.cc
+Date.cc
+TimeStamp.cc
+TimeZone.cc
 )
 
 add_library(arale_base ${base_SRCS})

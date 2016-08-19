@@ -2,7 +2,6 @@
 #ifndef ARALE_NET_EVENTLOOP_H
 #define ARALE_NET_EVENTLOOP_H
 
-#include <sys/types.h>
 #include <arale/base/CurrentThread.h>
 
 
@@ -31,9 +30,9 @@ private:
 
 };
 
-};
+}
 
-};
+}
 
 
 #endif

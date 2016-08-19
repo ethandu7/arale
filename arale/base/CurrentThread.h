@@ -15,11 +15,13 @@ extern __thread int threadIDStr_len;
 
 pid_t getCurrentThreadID();
 
-const char* getThreadIDStr() {
+
+// don't forget inline keyword, otherwise it will get "multiple definition" error
+inline const char* getThreadIDStr() {
     return threadIDStr;
 }
 
-int getThreadIDStrLen() {
+inline int getThreadIDStrLen() {
     return threadIDStr_len;
 }
 

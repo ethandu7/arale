@@ -75,6 +75,7 @@ class LogStream
 {
   typedef LogStream self;
 public:
+  LogStream() { };
   LogStream(const LogStream&) = delete;
   LogStream& operator=(const LogStream&) = delete;
   

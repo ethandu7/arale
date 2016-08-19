@@ -12,3 +12,4 @@ target_link_libraries(arale_base pthread rt)
 
 set_target_properties(arale_base PROPERTIES COMPILE_FLAGS "-std=c++0x")
 
+add_subdirectory(tests)

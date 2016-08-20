@@ -35,6 +35,8 @@ public:
                       << ", current thread id = " <<  base::getCurrentThreadID();
         }
     }
+
+    static EventLoop* getCurrentEventLoop();
 private:
     const pid_t threadID_;
     bool islooping;

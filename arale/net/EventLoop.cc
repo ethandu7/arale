@@ -9,7 +9,7 @@
 using namespace arale::net;
 
 
-// only aviable in this file
+// only available in this file
 namespace {
 
 __thread EventLoop* currentThreadEventLoop;

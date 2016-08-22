@@ -3,6 +3,7 @@ set(net_SRCS
 EventLoop.cc
 Poller.cc
 TimerQueue.cc
+Channel.cc
 )
 
 add_library(arale_net ${net_SRCS})

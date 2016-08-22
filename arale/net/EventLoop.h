@@ -36,6 +36,9 @@ public:
         }
     }
 
+    void updateChannel(Channel *channel);
+    void removeChannel(Channel *channel);
+
     static EventLoop* getCurrentEventLoop();
 private:
     const pid_t threadID_;
@@ -47,7 +50,6 @@ private:
 }
 
 }
-
 
 #endif
 

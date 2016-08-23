@@ -15,7 +15,9 @@ class Channel;
 
 class Poller {
 public:
-    using ChannelList = std::vector<Channel *>;
+    // g++ 4.4.6 doesn't know this type alias, only know typedef
+    //using ChannelList = std::vector<Channel *>;
+    typedef std::vector<Channel *> ChannelList;
     
     Poller(EventLoop *loop);
     Poller(const Poller&) = delete;
@@ -31,7 +33,11 @@ public:
     }
     
 protected:
-    using ChannelMap = std::map<int, Channel*>;
+    //using ChannelMap = std::map<int, Channel*>;
+    typedef std::map<int, Channel*> ChannelMap;
+
+    // store the poniter to Channel that need to be polled
+    // key is the fd associated with the Channel
     ChannelMap channels_;
 
 private:    

@@ -13,8 +13,11 @@ class EventLoop;
 
 class Channel {
 public:
-    using EventCallback = std::function<void ()>;
-    using ReadEventCallback = std::function<void (Timestamp)>;
+    // not support by g++ 4.4.6
+    //using EventCallback = std::function<void ()>;
+    //using ReadEventCallback = std::function<void (Timestamp)>;
+    typedef std::function<void ()>  EventCallback;
+    typedef std::function<void (Timestamp)> ReadEventCallback;
     
     Channel(EventLoop* loop, int socketFD);
     Channel(const Channel&) = delete;
@@ -44,6 +47,11 @@ public:
     void set_revents(int revents) { revents_ = revents; }
 
     int getfd() { return fd_; }
+    // for poller
+    void setIndex(int index) { index_ = index; }
+    int getIndex() { return index_; }
+    int getEvents() { return events_; }
+    bool isNoneEvent() { return events_ == kNoneEvent; }
 
     void HandleEvent(Timestamp receiveTime);
 
@@ -58,13 +66,16 @@ private:
     EventCallback writeCallback_;
     EventCallback errorCallback_;
     EventCallback closeCallback_;
-    
+
+    // used by poller
     static const int kNoneEvent;
     static const int kReadEvent;
     static const int kWriteEvent;
     int events_;
     int revents_;
-    bool isInLoop;
+    bool isInLoop_;
+    // the index in the poller's fd set
+    int index_;
 };
 
 }

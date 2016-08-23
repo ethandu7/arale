@@ -1,7 +1,6 @@
 
-
-#include <arale/base/CurrentThread.h>
 #include <arale/net/EventLoop.h>
+#include <arale/base/CurrentThread.h>
 #include <arale/net/Poller.h>
 #include <arale/net/TimerQueue.h>
 

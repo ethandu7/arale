@@ -19,12 +19,14 @@ public:
 
     virtual ~PollPoller();
     virtual Timestamp poll(int timeoutMs, ChannelList* activeChannels);
-    virtual void insertChannel(Channel *channel);
+    virtual void updateChannel(Channel *channel);
     virtual void removeChannel(Channel *channel);
 
 private:
     void fillActiveChannels(int numEvents, ChannelList *activeChannels);
-    using PollfdList = std::vector<struct pollfd>;
+    // not support by  g++ 4.4.6
+    //using PollfdList = std::vector<struct pollfd>;
+    typedef std::vector<struct pollfd> PollfdList;
     PollfdList pollfds_;
 };
 

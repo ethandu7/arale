@@ -1,3 +1,4 @@
+#include <arale/base/Types.h>
 #include <arale/net/Channel.h>
 #include <arale/net/PollPoller.h>
 #include <assert.h>
@@ -55,12 +56,62 @@ void PollPoller::fillActiveChannels(int numEvents, ChannelList * activeChannels)
     }
 }
 
-void PollPoller::insertChannel(Channel * channel) {
 
+// this will be called by EventLoop
+void PollPoller::updateChannel(Channel * channel) {
+    Poller::assertInLoopThread();
+    LOG_TRACE << "fd = " << channel->getfd() << " events = " << channel->getEvents();
+    //  new added channel
+    if (channel->getIndex() < 0) {
+        assert(channels_.find(channel->getfd()) == channels_.end());
+        struct pollfd pfd;
+        pfd.fd = channel->getfd();
+        pfd.events = static_cast<short>(channel->getEvents());
+        pfd.revents = 0;
+        pollfds_.push_back(pfd);
+        channel->setIndex(static_cast<int>(pollfds_.size() - 1));
+        channels_[pfd.fd] = channel;
+    } else {
+        // updating an existing one
+        assert(channels_.find(channel->getfd()) != channels_.end());
+        // it should be a reference, not an object
+        struct pollfd &pfd = pollfds_[channel->getIndex()];
+        assert(pfd.fd == channel->getfd() || pfd.fd == -channel->getfd() - 1);
+        pfd.events = static_cast<short>(channel->getEvents());
+        pfd.revents = 0;
+        if (channel->isNoneEvent()) {
+            // let poller ignor this pollfd
+            // note: the fd also is the key in the map, we can not change the key
+            //       so we have inconsistent fds at two different places
+            pfd.fd = -channel->getfd() - 1;
+        }
+    }
 }
 
 void PollPoller::removeChannel(Channel * channel) {
-
+    Poller::assertInLoopThread();
+    LOG_TRACE << "fd = " << channel->getfd();
+    assert(channels_.find(channel->getfd()) != channels_.end());
+    int index = channel->getIndex();
+    assert(index >= 0 && index < static_cast<int>(pollfds_.size()));
+    // a channel must have no events on it before it can be removed from the poller's fd set
+    // that means the fd in this channel is reset
+    assert(channel->isNoneEvent());
+    size_t n  = channels_.erase(channel->getfd());
+    assert(n == 1);
+    (void)n;
+    
+    if (static_cast<size_t>(index) != pollfds_.size() - 1) {
+        int lastChannel = pollfds_.back().fd;
+        struct pollfd &pfd = pollfds_[index];
+        // explicitly inhibit the ADL and any custom swap method
+        std::swap(pfd, pollfds_.back());
+        if (lastChannel < 0) {
+            lastChannel = -lastChannel - 1;
+        }
+        channels_[lastChannel]->setIndex(index);
+    }
+    pollfds_.pop_back();
 }
 
 }

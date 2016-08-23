@@ -19,22 +19,23 @@ Channel::Channel(EventLoop * loop, int socketFD) :
     fd_(socketFD), 
     events_(kNoneEvent),
     revents_(kNoneEvent),
-    isInLoop(false)
+    isInLoop_(false),
+    index_(-1)
 {
     
 }
 
 Channel::~Channel() {
-    assert(!isInLoop);
+    assert(!isInLoop_);
 }
 
 void Channel::update() {
-    isInLoop = true;
+    isInLoop_ = true;
     loop_->updateChannel(this);
 }
 
 void Channel::remove() {
-    isInLoop = false;
+    isInLoop_ = false;
     loop_->removeChannel(this);
 }
 

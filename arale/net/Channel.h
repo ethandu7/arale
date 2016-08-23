@@ -41,6 +41,10 @@ public:
     void disableAll()
     { events_ = kNoneEvent; update(); }
 
+    void set_revents(int revents) { revents_ = revents; }
+
+    int getfd() { return fd_; }
+
     void HandleEvent(Timestamp receiveTime);
 
     void remove();

@@ -17,7 +17,7 @@ class TimerQueue;
 class Channel;
 
 class EventLoop {
-public:
+public:    
     EventLoop();
     ~EventLoop();
     EventLoop(const EventLoop&) = delete;

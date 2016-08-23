@@ -1,14 +1,9 @@
 
-
 #include <arale/base/Logging.h>
 #include <arale/net/Channel.h>
 #include <arale/net/EventLoop.h>
 #include <poll.h>
 
-
-//using namespace arale;
-
-//using namespace arale::net;
 
 namespace arale {
 
@@ -30,6 +25,7 @@ Channel::Channel(EventLoop * loop, int socketFD) :
 }
 
 Channel::~Channel() {
+    assert(!isInLoop);
 }
 
 void Channel::update() {

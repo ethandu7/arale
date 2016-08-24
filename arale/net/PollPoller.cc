@@ -19,9 +19,13 @@ PollPoller::~PollPoller() {
 
 }
 
+// don't do event dispatch here, that is Channel object's job, let EventLoop trigger it
+// also if we handle event here, which may make the pollfds_ changes its size, it's dangerous 
 Timestamp PollPoller::poll(int timeoutMs, ChannelList *activeChannels) {
-    // should have &* in the front, vector<struct pollfd>::iterator can not be converted to pollfd* 
-    int nEvents = ::poll(&*pollfds_.begin(), pollfds_.size(), timeoutMs);
+    // should have &* in the front, vector<struct pollfd>::iterator can not be converted to pollfd * 
+    //int nEvents = ::poll(&*pollfds_.begin(), pollfds_.size(), timeoutMs);
+    // in c++11 it can be pollfds_data()
+    int nEvents = ::poll(pollfds_.data(), pollfds_.size(), timeoutMs);
     int savedErrno = errno;
     Timestamp returnTime(Timestamp::now());
     if (nEvents > 0) {

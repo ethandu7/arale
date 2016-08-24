@@ -6,6 +6,7 @@
 #include <arale/base/Logging.h>
 
 #include <memory>   // c++ for smart pointers
+#include <vector>
 
 
 namespace arale {
@@ -40,11 +41,19 @@ public:
     void removeChannel(Channel *channel);
 
     static EventLoop* getCurrentEventLoop();
+
+    void quit() { quit_ = true; }
+    
 private:
     const pid_t threadID_;
-    bool islooping;
+    bool islooping_;
     std::unique_ptr<Poller> poller_;
     std::unique_ptr<TimerQueue> timerQueue_;
+    
+    typedef std::vector<Channel*> ChannelList;
+    ChannelList activeChannels_;
+
+    bool quit_;
 };
 
 }

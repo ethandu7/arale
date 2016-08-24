@@ -2,3 +2,6 @@
 add_executable(eventloop_test00 EventLoop_Test00.cc)
 target_link_libraries(eventloop_test00 arale_net)
 
+add_executable(eventloop_test01 EventLoop_Test01.cc)
+target_link_libraries(eventloop_test01 arale_net)
+

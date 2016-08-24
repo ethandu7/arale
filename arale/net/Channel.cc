@@ -39,7 +39,7 @@ void Channel::remove() {
     loop_->removeChannel(this);
 }
 
-void Channel::HandleEvent(Timestamp receiveTime) {
+void Channel::handleEvent(Timestamp receiveTime) {
 
     // try to write but peer already close the channel
     if ((revents_ & POLLHUP) && !(revents_ & POLLIN)) {

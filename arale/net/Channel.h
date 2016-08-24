@@ -52,8 +52,9 @@ public:
     int getIndex() { return index_; }
     int getEvents() { return events_; }
     bool isNoneEvent() { return events_ == kNoneEvent; }
+    EventLoop* getEventLoop() { return loop_; }
 
-    void HandleEvent(Timestamp receiveTime);
+    void handleEvent(Timestamp receiveTime);
 
     void remove();
 

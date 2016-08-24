@@ -13,6 +13,10 @@ namespace net {
 
 class Channel;
 
+
+// this class doesn't own Channel objects
+// every Channel object should register itself to poller after construction 
+// and unregister itself from poller before destruction
 class Poller {
 public:
     // g++ 4.4.6 doesn't know this type alias, only know typedef
@@ -25,13 +29,13 @@ public:
 
     virtual ~Poller();
     virtual Timestamp poll(int timeoutMs, ChannelList *activeChannels) = 0;
-    virtual void insertChannel(Channel *channel) = 0;
+    virtual void updateChannel(Channel *channel) = 0;
     virtual void removeChannel(Channel *channel) = 0;
 
     void assertInLoopThread() {
         loop_->assertInLoopThread();
     }
-    
+    static Poller* setDefaultPoller(EventLoop *loop);
 protected:
     //using ChannelMap = std::map<int, Channel*>;
     typedef std::map<int, Channel*> ChannelMap;

@@ -77,6 +77,14 @@ void EventLoop::removeChannel(Channel * channel) {
     poller_->removeChannel(channel);
 }
 
+void EventLoop::runInLoop(const InLoopFunctor functor) {
+    if (isInLoopThread()) {
+        functor();
+    } else {
+
+    }
+}
+
 }
 
 }

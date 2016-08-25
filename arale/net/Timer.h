@@ -4,6 +4,7 @@
 
 #include <arale/base/Atomic.h>
 #include <arale/base/TimeStamp.h>
+#include <arale/net/Callbacks.h>
 #include <cstdint>
 #include <functional>
 //#include <cstdatomic>   //not the same as c++11 stand, it should be <atomic> according to the stand
@@ -13,9 +14,7 @@ namespace arale {
 namespace net {
     
 class Timer {
-public:
-    typedef std::function<void ()> TimerCallback; 
-    
+public:    
     Timer(const TimerCallback &timerCallback, Timestamp expiration, double interval);
     Timer(const Timer&) = delete;
     Timer& operator=(const Timer&) = delete;

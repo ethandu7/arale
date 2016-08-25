@@ -7,7 +7,7 @@
 
 #include <memory>   // c++ for smart pointers
 #include <vector>
-
+#include <functional>
 
 namespace arale {
 
@@ -18,7 +18,8 @@ class TimerQueue;
 class Channel;
 
 class EventLoop {
-public:    
+public:
+    typedef std::function<void ()> InLoopFunctor;
     EventLoop();
     ~EventLoop();
     EventLoop(const EventLoop&) = delete;
@@ -39,6 +40,8 @@ public:
 
     void updateChannel(Channel *channel);
     void removeChannel(Channel *channel);
+
+    void runInLoop(const InLoopFunctor functor);
 
     static EventLoop* getCurrentEventLoop();
 

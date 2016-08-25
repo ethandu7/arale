@@ -10,7 +10,7 @@ class Timer;
 
 class TimerID {
 public:
-    TimerID() : timer_(nullptr), id_(0) {   }
+    TimerID() : timer_(nullptr), sequence_(0) {   }
     
     TimerID(Timer* timer, int64_t seq) :
         timer_(timer), sequence_(seq) 

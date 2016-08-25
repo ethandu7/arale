@@ -83,6 +83,7 @@ void PollPoller::updateChannel(Channel * channel) {
         assert(pfd.fd == channel->getfd() || pfd.fd == -channel->getfd() - 1);
         pfd.events = static_cast<short>(channel->getEvents());
         pfd.revents = 0;
+        // when up level call disableAll()
         if (channel->isNoneEvent()) {
             // let poller ignor this pollfd
             // note: the fd also is the key in the map, we can not change the key

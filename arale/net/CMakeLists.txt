@@ -7,6 +7,7 @@ Channel.cc
 Poller.cc
 PollPoller.cc
 DefaultPoller.cc
+Timer.cc
 )
 
 add_library(arale_net ${net_SRCS})

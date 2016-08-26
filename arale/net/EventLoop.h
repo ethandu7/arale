@@ -10,6 +10,7 @@
 #include <memory>   // for smart pointers
 #include <vector>
 #include <functional>
+#include <mutex>
 
 namespace arale {
 
@@ -43,11 +44,11 @@ public:
     void updateChannel(Channel *channel);
     void removeChannel(Channel *channel);
 
-    void runInLoop(const InLoopFunctor functor);
+    void runInLoop(const InLoopFunctor &functor);
 
     static EventLoop* getCurrentEventLoop();
 
-    void quit() { quit_ = true; }
+    void quitLoop();
 
     // timer interface
     TimerID runAt(Timestamp when, const TimerCallback& callback);
@@ -55,6 +56,11 @@ public:
     TimerID runEvery(double interval, const TimerCallback& callback);
     
 private:
+    void postFuntor(const InLoopFunctor& functor);
+    void weakup();
+    void handleWakeup();
+    void doPendingFunctors();
+    
     const pid_t threadID_;
     bool islooping_;
     std::unique_ptr<Poller> poller_;
@@ -63,7 +69,19 @@ private:
     typedef std::vector<Channel*> ChannelList;
     ChannelList activeChannels_;
 
+    // for functor post subsystem
+    std::mutex pendingMutex_;
+    // we donn't want to weak up the loop thread if the loop is run those functors
+    // because the loop is awake
+    bool isHandlingPendingFunctors_;
+    typedef std::vector<InLoopFunctor> PendingFunctorList;
+    PendingFunctorList pendingFunctors_;
+
     bool quit_;
+
+    // for weakup 
+    const int wakeupFd_;
+    std::unique_ptr<Channel> wakeupChannel_;
 };
 
 }

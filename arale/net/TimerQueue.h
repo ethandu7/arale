@@ -42,6 +42,7 @@ private:
     std::vector<Entry> getExpiredTimers(Timestamp now);
     bool insert(Timer* timer);
     void resetTimers(const std::vector<Entry> &timers, Timestamp now);
+    void readTimerfd(const int timerfd, Timestamp now);
     void resetTimerfd(const int timerfd, Timestamp when);
     
     EventLoop *loop_;

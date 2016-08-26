@@ -85,6 +85,20 @@ void EventLoop::runInLoop(const InLoopFunctor functor) {
     }
 }
 
+TimerID EventLoop::runAt(Timestamp when, const TimerCallback & callback) {
+    return timerQueue_->addTimer(callback, when, 0.0);
+}
+
+TimerID EventLoop::runAfter(double delay, const TimerCallback & callback) {
+    Timestamp when(addTime(Timestamp::now(), delay));
+    return timerQueue_->addTimer(callback, when, 0.0);
+}
+
+TimerID EventLoop::runEvery(double interval, const TimerCallback & callback) {
+    Timestamp when(addTime(Timestamp::now(), interval));
+    return timerQueue_->addTimer(callback, when, interval);
+}
+
 }
 
 }

@@ -4,8 +4,10 @@
 
 #include <arale/base/CurrentThread.h>
 #include <arale/base/Logging.h>
+#include <arale/net/TimerID.h>
+#include <arale/net/Callbacks.h>
 
-#include <memory>   // c++ for smart pointers
+#include <memory>   // for smart pointers
 #include <vector>
 #include <functional>
 
@@ -46,6 +48,11 @@ public:
     static EventLoop* getCurrentEventLoop();
 
     void quit() { quit_ = true; }
+
+    // timer interface
+    TimerID runAt(Timestamp when, const TimerCallback& callback);
+    TimerID runAfter(double delay, const TimerCallback& callback);
+    TimerID runEvery(double interval, const TimerCallback& callback);
     
 private:
     const pid_t threadID_;

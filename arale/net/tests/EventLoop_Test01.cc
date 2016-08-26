@@ -10,12 +10,16 @@ using namespace arale::net;
 EventLoop* g_loop;
 
 void timeout(arale::Timestamp, Channel *channel) {
+    
+    uint64_t howmany;
+    ssize_t n = ::read(channel->getfd(), &howmany, sizeof howmany);
+    (void)n;
     printf("Timeout!\n");
     //g_loop->quit();
-    struct itimerspec howlong;
-    bzero(&howlong, sizeof(howlong));
-    howlong.it_value.tv_sec = 5;
-    ::timerfd_settime(channel->getfd(), 0, &howlong, NULL);
+    //struct itimerspec howlong;
+    //bzero(&howlong, sizeof(howlong));
+    //howlong.it_value.tv_sec = 5;
+    //::timerfd_settime(channel->getfd(), 0, &howlong, NULL);
 }
 
 int main() {

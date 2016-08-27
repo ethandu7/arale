@@ -179,12 +179,16 @@ TimerID EventLoop::runAt(Timestamp when, const TimerCallback & callback) {
 
 TimerID EventLoop::runAfter(double delay, const TimerCallback & callback) {
     Timestamp when(addTime(Timestamp::now(), delay));
-    return timerQueue_->addTimer(callback, when, 0.0);
+    return runAt(when, callback);
 }
 
 TimerID EventLoop::runEvery(double interval, const TimerCallback & callback) {
     Timestamp when(addTime(Timestamp::now(), interval));
     return timerQueue_->addTimer(callback, when, interval);
+}
+
+void EventLoop::cancelTimer(TimerID timer) {
+    return timerQueue_->cancelTimer(timer);
 }
 
 void EventLoop::quitLoop() {

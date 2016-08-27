@@ -54,6 +54,7 @@ public:
     TimerID runAt(Timestamp when, const TimerCallback& callback);
     TimerID runAfter(double delay, const TimerCallback& callback);
     TimerID runEvery(double interval, const TimerCallback& callback);
+    void cancelTimer(TimerID timer);
     
 private:
     void postFuntor(const InLoopFunctor& functor);

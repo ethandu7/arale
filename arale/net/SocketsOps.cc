@@ -16,20 +16,6 @@ namespace {
 
 typedef struct sockaddr SA;
 
-#if VALGRIND || defined (NO_ACCEPT4)
-void setNonBlockAndCloseOnExec(int sockfd) {
-    // non-block
-    int flags = fcntl(sockfd, F_GETFL, 0);
-    flags |= O_NONBLOCK;
-    int ret = fcntl(sockfd, F_SETFL, flags);
-
-    // close-on-exec
-    flags = fcntl(sockfd, F_GETFD, 0);
-    flags |= FD_CLOEXEC;
-    int ret = fcntl(sockfd, F_SETFD, flags);
-}
-#endif
-
 }
 
 namespace arale {
@@ -101,6 +87,138 @@ void toIpPort(char * buf, size_t size, const struct sockaddr * addr) {
     snprintf(buf + end, size - end, ":%u", port);
 }
 
+
+
+int createNonblockingOrDie(sa_family_t family) {
+    int sockfd = socket(family, SOCK_STREAM | SOCK_NONBLOCK | SOCK_CLOEXEC, IPPROTO_TCP);
+    if (sockfd < 0) {
+        LOG_SYSFATAL << "[createNonBlockingOrDie]: cannot creat socket";
+    }
+    return sockfd;
+}
+
+void bindOrDie(int sockfd, const struct sockaddr * addr) {
+    int ret = bind(sockfd, addr, static_cast<socklen_t>(sizeof(struct sockaddr_in6)));
+    if (ret < 0) {
+        LOG_SYSFATAL << "[bindOrDie]: cannot bind address to socket";
+    }
+}
+
+void listenOrDie(int sockfd) {
+    int ret  = listen(sockfd, SOMAXCONN);
+    if (ret < 0) {
+        LOG_SYSFATAL << "[listenOrDie]: cannot listen on socket";
+    }
+}
+
+int accept(int sockfd, struct sockaddr_in6 * addr) {
+    socklen_t addrlen = static_cast<socklen_t>(sizeof(*addr));
+    int connfd = accept4(sockfd, sockaddr_cast(addr), &addrlen, SOCK_NONBLOCK | SOCK_CLOEXEC);
+
+    if (connfd < 0) {
+        LOG_SYSFATAL << "[sockets::accept]: cannot accept new connection";
+        int savedErrno = errno;
+        switch (savedErrno) {
+            case EAGAIN:
+            case ECONNABORTED:
+            case EINTR:
+            case EPROTO:
+            case EPERM:
+            case EMFILE:
+                errno = savedErrno;
+                break;
+            case EBADF:
+            case EFAULT:
+            case EINVAL:
+            case ENFILE:
+            case ENOBUFS:
+            case ENOMEM:
+            case ENOTSOCK:
+            case EOPNOTSUPP:
+                LOG_FATAL << "unexcepted error of ::accept" << savedErrno;
+                break;
+            default:
+                LOG_FATAL << "unknown error of ::accept" << savedErrno;
+                break;
+        }
+    }
+    return connfd;
+}
+
+int connect(int sockfd, const struct sockaddr * addr) {
+    return connect(sockfd, addr, static_cast<socklen_t>(sizeof(struct sockaddr_in6)));
+}
+
+ssize_t read(int sockfd, void * buf, size_t count) {
+    return ::read(sockfd, buf, count);
+}
+
+ssize_t readv(int sockfd, const struct iovec * iov, int iovcnt) {
+    return ::readv(sockfd, iov, iovcnt);
+}
+
+ssize_t write(int sockfd, const void *buf, size_t count) {
+    return ::write(sockfd, buf, count);
+}
+
+void close(int sockfd) {
+  if (::close(sockfd) < 0)
+  {
+    LOG_SYSERR << "::close";
+  }
+}
+
+void shutdownWrite(int sockfd) {
+    if (::shutdown(sockfd, SHUT_WR) < 0) {
+        LOG_SYSERR << "shutdownWrite";
+    }
+}
+
+int getSocketError(int sockfd) {
+    int optval;
+    socklen_t optlen = static_cast<socklen_t>(sizeof(optval));
+    if (getsockopt(sockfd, SOL_SOCKET, SO_ERROR, &optval, &optlen) < 0) {
+        return errno;
+    } else {
+        return optval;
+    }
+}
+
+struct sockaddr_in6 getLocalAddr(int sockfd) {
+    struct sockaddr_in6 localaddr;
+    bzero(&localaddr, sizeof(localaddr));
+    socklen_t addrlen = static_cast<socklen_t>(sizeof(localaddr));
+    if (getsockname(sockfd, sockaddr_cast(&localaddr), &addrlen) < 0) {
+        LOG_SYSERR << "sockets::getLocalAddr";
+    }
+    return localaddr;
+}
+
+struct sockaddr_in6 getPeerAddr(int sockfd) {
+    struct sockaddr_in6 peeraddr;
+    bzero(&peeraddr, sizeof(peeraddr));
+    socklen_t addrlen = static_cast<socklen_t>(sizeof(peeraddr));
+    if (getpeername(sockfd, sockaddr_cast(&peeraddr), &addrlen) < 0) {
+        LOG_SYSERR << "sockets::getPeerAdddr";
+    }
+    return peeraddr;
+}
+
+bool isSelfConnect(int sockfd) {
+    struct sockaddr_in6 localaddr = getLocalAddr(sockfd);
+    struct sockaddr_in6 peeraddr = getPeerAddr(sockfd);
+    if (localaddr.sin6_family == AF_INET) {
+        const struct sockaddr_in *laddr = reinterpret_cast<struct sockaddr_in *>(&localaddr);
+        const struct sockaddr_in *paddr = reinterpret_cast<struct sockaddr_in *>(&peeraddr);
+        return (laddr->sin_port == paddr->sin_port) && 
+            (laddr->sin_addr.s_addr == paddr->sin_addr.s_addr);
+    } else if(localaddr.sin6_family == AF_INET) {
+        return (localaddr.sin6_family == peeraddr.sin6_family) &&
+            (memcmp(&localaddr.sin6_addr, &peeraddr.sin6_addr, sizeof(localaddr.sin6_addr)) == 0);
+    } else {
+        return false;
+    }
+}
 
 }
 

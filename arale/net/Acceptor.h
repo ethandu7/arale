@@ -17,17 +17,27 @@ class EventLoop;
 
 class Acceptor {
 public:
-    typedef std::function<void (int sockFd, const InetAddress&)>  AcceptorCallback;
-    Acceptor(EventLoop* loop);
+    typedef std::function<void (int sockFd, const InetAddress&)>  NewConnectionCallback;
+    Acceptor(EventLoop* loop, const InetAddress&, bool);
     Acceptor(const Acceptor&) = delete;
     Acceptor& operator=(const Acceptor&) = delete;
+    ~Acceptor();
 
+    void setNewConnectionCallback(const NewConnectionCallback &callback) {
+        newConnectionCallback_ = callback;
+    }
+
+    bool isListenning() const { return isListenning_; }
+    bool startListening();
+    
 private:
-    const listenFd_;
+    void handleNewConnection();
+
     EventLoop *loop_;
+    Socket acceptSocket_;
     Channel accceptChannel_;
-    Socket acceptSockte_;
-    bool isListenning_
+    NewConnectionCallback newConnectionCallback_;
+    bool isListenning_;
 };
 
 }

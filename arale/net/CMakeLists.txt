@@ -11,6 +11,7 @@ Timer.cc
 SocketsOps.cc
 InetAddress.cc
 Socket.cc
+Acceptor.cc
 )
 
 add_library(arale_net ${net_SRCS})

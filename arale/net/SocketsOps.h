@@ -10,7 +10,6 @@ namespace net {
 
 namespace sockets {
 
-
 ///
 /// Creates a non-blocking socket file descriptor,
 /// abort if any error.

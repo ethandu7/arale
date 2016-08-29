@@ -12,12 +12,6 @@
 #include <sys/socket.h>
 #include <unistd.h>
 
-namespace {
-
-typedef struct sockaddr SA;
-
-}
-
 namespace arale {
 
 namespace net {

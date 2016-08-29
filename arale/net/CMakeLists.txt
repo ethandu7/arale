@@ -10,6 +10,7 @@ DefaultPoller.cc
 Timer.cc
 SocketsOps.cc
 InetAddress.cc
+Socket.cc
 )
 
 add_library(arale_net ${net_SRCS})

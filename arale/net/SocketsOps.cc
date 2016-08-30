@@ -1,9 +1,8 @@
 
-#include <arale/net/SocketsOps.h>
-
 #include <arale/base/Logging.h>
 #include <arale/base/Types.h>
 #include <arale/net/Endian.h>
+#include <arale/net/SocketsOps.h>
 
 #include <errno.h>
 #include <fcntl.h>

@@ -10,6 +10,7 @@ int main() {
 
     int optval = 1;
     int res = setsockopt(sock, SOL_IP, IP_TRANSPARENT, &optval, static_cast<socklen_t>(sizeof(optval)));
+    (void)res;
     optval = 0;
     socklen_t optvallen = static_cast<socklen_t>(sizeof(optval));
     res = getsockopt(sock, SOL_IP, IP_TRANSPARENT, &optval, &optvallen);

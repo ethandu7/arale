@@ -28,7 +28,7 @@ public:
     }
 
     bool isListenning() const { return isListenning_; }
-    bool startListening();
+    void startListening();
     
 private:
     void handleNewConnection();
@@ -38,6 +38,12 @@ private:
     Channel accceptChannel_;
     NewConnectionCallback newConnectionCallback_;
     bool isListenning_;
+    // it will be created at the beginning
+    // when the FD runs out(accept cann't get a FD) 
+    // we can close this idle FD and make accept get a FD
+    // then we close the new created FD, so client can get something at least
+    // the last step is to creat a backup FD again, just like beginning
+    int backupFd_;
 };
 
 }

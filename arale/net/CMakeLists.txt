@@ -12,6 +12,8 @@ SocketsOps.cc
 InetAddress.cc
 Socket.cc
 Acceptor.cc
+TcpServer.cc
+TcpConnection.cc
 )
 
 add_library(arale_net ${net_SRCS})

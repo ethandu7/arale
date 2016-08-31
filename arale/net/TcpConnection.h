@@ -3,6 +3,7 @@
 #define ARALE_NET_TCPCONNECTION_H
 
 #include <arale/net/Callbacks.h>
+#include <arale/net/InetAddress.h>
 
 #include <string>
 #include <memory>
@@ -18,7 +19,7 @@ class Socket;
 class TcpConnection {
 public:
     TcpConnection(EventLoop *loop, const std::string& name, int sockfd);
-    TcpConnection& TcpConnection(const TcpConnection&) = delete;
+    TcpConnection(const TcpConnection&) = delete;
     TcpConnection& operator=(const TcpConnection&) = delete;
     ~TcpConnection();
 

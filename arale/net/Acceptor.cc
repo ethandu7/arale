@@ -17,7 +17,7 @@ Acceptor::Acceptor(EventLoop * loop, const InetAddress &listenAddr, bool reusepo
     loop_(loop),
     acceptSocket_(sockets::createNonblockingOrDie(listenAddr.family())),
     accceptChannel_(loop, acceptSocket_.getSockfd()),
-    isListenning_(false)
+    isListening_(false)
 {   
     acceptSocket_.setReuseAddr(true);
     acceptSocket_.setReusePort(reuseport);
@@ -27,7 +27,7 @@ Acceptor::Acceptor(EventLoop * loop, const InetAddress &listenAddr, bool reusepo
 }
 
 Acceptor::~Acceptor() {
-    if (isListenning_) {
+    if (isListening_) {
         accceptChannel_.disableAll();
         accceptChannel_.remove();
     }
@@ -38,7 +38,7 @@ void Acceptor::startListening() {
     loop_->assertInLoopThread();
     acceptSocket_.listen();
     accceptChannel_.enableRead();
-    isListenning_ = true;
+    isListening_ = true;
 }
 
 void Acceptor::handleNewConnection() {

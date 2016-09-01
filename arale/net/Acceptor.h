@@ -27,7 +27,7 @@ public:
         newConnectionCallback_ = callback;
     }
 
-    bool isListenning() const { return isListenning_; }
+    bool isListening() const { return isListening_; }
     void startListening();
     
 private:
@@ -37,7 +37,7 @@ private:
     Socket acceptSocket_;
     Channel accceptChannel_;
     NewConnectionCallback newConnectionCallback_;
-    bool isListenning_;
+    bool isListening_;
     // it will be created at the beginning
     // when the FD runs out(accept cann't get a FD) 
     // we can close this idle FD and make accept get a FD

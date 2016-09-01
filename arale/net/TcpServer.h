@@ -35,6 +35,14 @@ public:
     TcpServer& operator=(const TcpServer&) = delete;
     ~TcpServer();
 
+    const std::string& getIpPort() { return ipPort_; }
+
+    const std::string& getName() { return name_; }
+
+    EventLoop* getLoop() { return loop_; }
+
+    void start();
+
     void setConnectionCallback(const ConnectionCallback& callback) {
         connectionCallback_ = callback;
     }
@@ -48,7 +56,9 @@ public:
     }
     
 private:
-    void newConncetion(int newconnfd, const InetAddress& peeraddr); 
+    void newConncetion(int newconnfd, const InetAddress& peeraddr);
+    void removeConnection(const TcpConnctionPtr&);
+    void removeConnectionInLoop(const TcpConnctionPtr&);
     // key is the name of TcpConnection
     typedef std::map<std::string, TcpConnctionPtr> ConnectionMap;
     EventLoop *loop_;
@@ -57,6 +67,7 @@ private:
     int nextConnId_;
     std::unique_ptr<Acceptor> accptor_;
     ConnectionMap connections_;
+    AtomicInt32 started_;
     // three and a half events need to be concerned in networking programming(according to Chen Shou)
     // 1.  new connection accepted
     // 2.  existing connection close(passive or initiative)

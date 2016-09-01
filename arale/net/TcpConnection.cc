@@ -16,11 +16,15 @@ void defaultMessageCallback(const TcpConnctionPtr & conn, Buffer *buf, Timestamp
     
 }
 
-TcpConnection::TcpConnection(EventLoop *loop, const string &name, int sockfd) 
+TcpConnection::TcpConnection(EventLoop *loop, const string &name, int sockfd,
+        const InetAddress &localaddr, const InetAddress &remoteaddr) 
     : loop_(loop),
       name_(name),
+      state_(kConnecting),
       socket_(new Socket(sockfd)),
-      readWriteChannel_(new Channel(loop_, sockfd)) {
+      readWriteChannel_(new Channel(loop_, sockfd)),
+      localAddr_(localaddr),
+      remoteAddr_(remoteaddr) {
 
 }
 

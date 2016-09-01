@@ -16,13 +16,17 @@ class EventLoop;
 class Channel;
 class Socket;
 
-class TcpConnection {
+class TcpConnection : public std::enable_shared_from_this<TcpConnection> {
 public:
-    TcpConnection(EventLoop *loop, const std::string& name, int sockfd);
+    TcpConnection(EventLoop *loop, const std::string& name, int sockfd,
+                    const InetAddress &localaddr, const InetAddress &remoteaddr);
     TcpConnection(const TcpConnection&) = delete;
     TcpConnection& operator=(const TcpConnection&) = delete;
     ~TcpConnection();
 
+    enum State { kConnecting, kConnected };
+
+    void setState(State state) { state_ = state; }
     EventLoop* getLoop() const { return loop_; }
     const std::string& getName() const { return name_; }
 
@@ -45,12 +49,22 @@ public:
     void setCloseCallback(const CloseCallback &cb) {
         closeCallback_ = cb;
     }
-    
+
+    void connectionEstablished();
+    void connectionDestroyed();
 private:
+    void handleRead(Timestamp receiveTime);
+    void handleWrite();
+    void handleClose();
+    void handleError();
+    
     EventLoop *loop_;
     const std::string name_;
+    State state_;
     std::unique_ptr<Socket> socket_;
     std::unique_ptr<Channel> readWriteChannel_;
+    InetAddress localAddr_;
+    InetAddress remoteAddr_;
     ConnectionCallback connectionCallback_;
     MessageCallback messageCallback_;
     WriteCompleteCallback writeCompleteCallback_;

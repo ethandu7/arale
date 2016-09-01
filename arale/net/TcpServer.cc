@@ -1,4 +1,5 @@
 
+#include <arale/base/Logging.h>
 #include <arale/net/EventLoop.h>
 #include <arale/net/Acceptor.h>
 #include <arale/net/TcpServer.h>
@@ -17,7 +18,9 @@ TcpServer::TcpServer(EventLoop* loop,
       name_(name),
       ipPort_(serveraddr.toIpPort()),
       nextConnId_(1),
-      accptor_(new Acceptor(loop, serveraddr, option == kReusePort)) {
+      accptor_(new Acceptor(loop, serveraddr, option == kReusePort)),
+      connectionCallback_(defaultConnectionCallback),
+      messageCallback_(defaultMessageCallback) {
     accptor_->setNewConnectionCallback(
         std::bind(&TcpServer::newConncetion, this, _1, _2));
 }
@@ -31,10 +34,17 @@ void TcpServer::newConncetion(int newconnfd, const InetAddress &peeraddr) {
     char buf[64];
     snprintf(buf, sizeof(buf), "-%s#%d", ipPort_.c_str(), nextConnId_);
     ++nextConnId_;
-    std::string name = name_ + buf;
+    std::string connName = name_ + buf;
 
-    TcpConnctionPtr newConn(new TcpConnection(loop_, name, newconnfd));
-    connections_[name] = newConn;
+    LOG_INFO << "TcpServer::newConnection [" << name_
+             << "] - new connection [" << connName
+             << "] from " << peeraddr.toIpPort();
+
+    TcpConnctionPtr newConn = std::make_shared<TcpConnection>(loop_, connName, newconnfd);
+    newConn->setConnectionCallback(connectionCallback_);
+    newConn->setMessageCallback(messageCallback_);
+    newConn->setWriteCompleteCallback(writeCompleteCallback_);
+    connections_[connName] = newConn;
 }
 
 }

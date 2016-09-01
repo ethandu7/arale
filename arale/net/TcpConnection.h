@@ -26,11 +26,36 @@ public:
     EventLoop* getLoop() const { return loop_; }
     const std::string& getName() const { return name_; }
 
+    void setConnectionCallback(const ConnectionCallback& cb) {
+        connectionCallback_ = cb;
+    }
+
+    void setMessageCallback(const MessageCallback &cb) {
+        messageCallback_ = cb;
+    }
+    
+    void setWriteCompleteCallback(const WriteCompleteCallback &cb) {
+        writeCompleteCallback_ = cb;
+    }
+
+    void setHighWaterMarkCallback(const HighWaterMarkCallback &cb) {
+        highWaterMarkCallback_ = cb;
+    }
+
+    void setCloseCallback(const CloseCallback &cb) {
+        closeCallback_ = cb;
+    }
+    
 private:
     EventLoop *loop_;
     const std::string name_;
     std::unique_ptr<Socket> socket_;
     std::unique_ptr<Channel> readWriteChannel_;
+    ConnectionCallback connectionCallback_;
+    MessageCallback messageCallback_;
+    WriteCompleteCallback writeCompleteCallback_;
+    HighWaterMarkCallback highWaterMarkCallback_;
+    CloseCallback closeCallback_;
 };
 
 }

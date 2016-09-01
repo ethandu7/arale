@@ -57,6 +57,13 @@ private:
     int nextConnId_;
     std::unique_ptr<Acceptor> accptor_;
     ConnectionMap connections_;
+    // three and a half events need to be concerned in networking programming(according to Chen Shou)
+    // 1.  new connection accepted
+    // 2.  existing connection close(passive or initiative)
+    // 3.  get data from peer
+    // 3.5 finish writing data to peer
+    // here we give the library user a chance to customize the handler for event 1, 3 and 3.5
+    // but we will fully control what would happen when event 2 happens
     ConnectionCallback connectionCallback_;
     MessageCallback messageCallback_;
     WriteCompleteCallback writeCompleteCallback_;

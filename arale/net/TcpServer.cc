@@ -74,7 +74,20 @@ void TcpServer::removeConnectionInLoop(const TcpConnctionPtr &conn) {
     assert(ret == 1);
     (void)ret;
     EventLoop *ioLoop = conn->getLoop();
-    ioLoop->runInLoop(std::bind(&TcpConnection::connectionDestroyed, conn));
+    
+    // can NOT invoke runInLoop because we are in loop thread certainly,
+    // we will continue to invoke TcpConnection::connectionDestroyed immediately,
+    // that means when we finish the further invocation and get back to the 
+    // function TcpConnection::handleClose, we still in event handle.
+    // We will destruct TcpConneciton object then, which will cause Channel object
+    // to be destructed, this disobey with the principle that do NOT destory Channel
+    // object during a event handle
+    //ioLoop->runInLoop(std::bind(&TcpConnection::connectionDestroyed, conn));
+    
+    // we post it so TcpConnection::connectionDestroyed will be called after 
+    // the event handle loop
+    // if a Channel object can be destory during event handle, we have to use this
+    ioLoop->postFuntor(std::bind(&TcpConnection::connectionDestroyed, conn));
 }
 
 void TcpServer::start() {

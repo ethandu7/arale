@@ -44,7 +44,8 @@ public:
     void updateChannel(Channel *channel);
     void removeChannel(Channel *channel);
 
-    void runInLoop(const InLoopFunctor &functor);
+    void runInLoop(const InLoopFunctor &functor);    
+    void postFuntor(const InLoopFunctor& functor);
 
     static EventLoop* getCurrentEventLoop();
 
@@ -57,7 +58,6 @@ public:
     void cancelTimer(TimerID timer);
     
 private:
-    void postFuntor(const InLoopFunctor& functor);
     void weakup();
     void handleWakeup();
     void doPendingFunctors();

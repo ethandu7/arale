@@ -30,6 +30,11 @@ public:
     EventLoop* getLoop() const { return loop_; }
     const std::string& getName() const { return name_; }
 
+    const InetAddress& localAddr() { return localAddr_; }
+    const InetAddress& remoteAddr() { return remoteAddr_; }
+
+    bool isConnected() { return state_ == kConnected; }
+
     void setConnectionCallback(const ConnectionCallback& cb) {
         connectionCallback_ = cb;
     }

@@ -4,6 +4,7 @@
 
 #include <arale/base/TimeStamp.h>
 #include <functional>
+#include <memory>
 
 namespace arale {
 
@@ -30,7 +31,7 @@ public:
     { writeCallback_ = writeEventCallback; }
     void setErrorCallback(const EventCallback &errorEventCallback) 
     { errorCallback_ = errorEventCallback; }
-    void setColseCallback(const EventCallback &closeEventCallback) 
+    void setCloseCallback(const EventCallback &closeEventCallback) 
     { closeCallback_ = closeEventCallback; }
 
     void enableRead()
@@ -58,8 +59,12 @@ public:
 
     void remove();
 
+    // why can't the type of parameter be weak_ptr???
+    void tieTo(const std::shared_ptr<void> &obj);
+
 private:
     void update();
+    void handleEventWithGuard(Timestamp receiveTime);
     
     EventLoop *loop_;
     const int fd_;
@@ -77,6 +82,12 @@ private:
     bool isInLoop_;
     // the index in the poller's fd set
     int index_;
+    // make sure the object who is having us hasn't been destoryed
+    // before we are trying to handle event
+    std::weak_ptr<void> tie_;
+    bool tied_;
+    // make sure we will not be destoryed during handle event
+    bool isHandlingEvent_;
 };
 
 }

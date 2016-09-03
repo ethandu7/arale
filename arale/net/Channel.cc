@@ -20,13 +20,16 @@ Channel::Channel(EventLoop * loop, int socketFD) :
     events_(kNoneEvent),
     revents_(kNoneEvent),
     isInLoop_(false),
-    index_(-1)
+    index_(-1),
+    tied_(false),
+    isHandlingEvent_(false)
 {
     
 }
 
 Channel::~Channel() {
     assert(!isInLoop_);
+    assert(!isHandlingEvent_);
 }
 
 void Channel::update() {
@@ -39,8 +42,26 @@ void Channel::remove() {
     loop_->removeChannel(this);
 }
 
-void Channel::handleEvent(Timestamp receiveTime) {
+void Channel::tieTo(const  std::shared_ptr<void> &obj) {
+    tie_ = obj;
+    tied_ = true;
+}
 
+void Channel::handleEvent(Timestamp receiveTime) {
+    std::shared_ptr<void> guard;
+    if (tied_) {
+        guard = tie_.lock();
+        if (guard) {
+            handleEventWithGuard(receiveTime);
+        }
+    } else {
+        handleEventWithGuard(receiveTime);
+    }
+}
+
+void Channel::handleEventWithGuard(Timestamp receiveTime) {
+    isHandlingEvent_ = true;
+    
     // try to write but peer already close the channel
     if ((revents_ & POLLHUP) && !(revents_ & POLLIN)) {
         LOG_WARN << "POLLHUP is happening";
@@ -69,6 +90,8 @@ void Channel::handleEvent(Timestamp receiveTime) {
         if (writeCallback_)
             writeCallback_();
     }
+
+    isHandlingEvent_ = false;
 }
 
 }

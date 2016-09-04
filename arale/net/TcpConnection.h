@@ -4,6 +4,7 @@
 
 #include <arale/net/Callbacks.h>
 #include <arale/net/InetAddress.h>
+#include <arale/net/Buffer.h>
 
 #include <string>
 #include <memory>
@@ -24,7 +25,7 @@ public:
     TcpConnection& operator=(const TcpConnection&) = delete;
     ~TcpConnection();
 
-    enum State { kConnecting, kConnected };
+    enum State { kConnecting, kConnected, kDisconnecting, kDisconnected };
 
     void setState(State state) { state_ = state; }
     EventLoop* getLoop() const { return loop_; }
@@ -35,6 +36,9 @@ public:
 
     bool isConnected() { return state_ == kConnected; }
 
+    // those setters are called only by TcpServer and TcpClent
+    // that means users should provide callbacks before get or send data
+    // do NOT set those callbacks by using TcpConnction object directly
     void setConnectionCallback(const ConnectionCallback& cb) {
         connectionCallback_ = cb;
     }
@@ -57,6 +61,9 @@ public:
 
     void connectionEstablished();
     void connectionDestroyed();
+
+    const char* stateToString() const;
+    
 private:
     void handleRead(Timestamp receiveTime);
     void handleWrite();
@@ -70,6 +77,8 @@ private:
     std::unique_ptr<Channel> readWriteChannel_;
     InetAddress localAddr_;
     InetAddress remoteAddr_;
+    Buffer inputBuffer_;
+    Buffer outputBuffer_;
     ConnectionCallback connectionCallback_;
     MessageCallback messageCallback_;
     WriteCompleteCallback writeCompleteCallback_;

@@ -27,6 +27,12 @@ TcpServer::TcpServer(EventLoop* loop,
 }
 
 TcpServer::~TcpServer() {
+    // this line means TcpServer object should be created in a io thread
+    // which makes all object created by TcpServer are in io thread too
+    //
+    // and that means if you want to do opreations on those objects, 
+    // you have to make sure those operations are thread safe
+    // such as read data from buffer or write data to buffer
     loop_->assertInLoopThread();
     LOG_TRACE << "TcpServer::~TcpServer [" << name_ << "] destructing";
     for(auto it = connections_.begin(); it != connections_.end(); ++it) {

@@ -44,6 +44,15 @@ public:
     void updateChannel(Channel *channel);
     void removeChannel(Channel *channel);
 
+    // if another object(such as TimerQueue) in other thread(non io thread) 
+    // wants to put something into loop or remove something from loop, 
+    // it should call this runInLoop function on loop object
+    //
+    // other object should define two different versions of one function
+    // see TimerQueue::addTimer and TimerQueue::addTimerInLoop
+    // the first verion uses the seconed version as a argument to call this runInLoop
+    // and the second verison do the real adding or remove
+    // by this way we can make sure we don't have to acquire a lock for adding or remove 
     void runInLoop(const InLoopFunctor &functor);    
     void postFuntor(const InLoopFunctor& functor);
 

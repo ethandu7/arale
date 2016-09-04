@@ -11,3 +11,6 @@ target_link_libraries(timer_test00 arale_net)
 add_executable(socket_test00 Socket_Test00.cc)
 target_link_libraries(socket_test00 arale_net)
 
+add_executable(tcpserver_test00 TcpServer_Test00.cc)
+target_link_libraries(tcpserver_test00 arale_net)
+

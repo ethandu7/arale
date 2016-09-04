@@ -96,6 +96,7 @@ void PollPoller::updateChannel(Channel * channel) {
 void PollPoller::removeChannel(Channel * channel) {
     Poller::assertInLoopThread();
     LOG_TRACE << "fd = " << channel->getfd();
+    // make sure we have this channel
     assert(channels_.find(channel->getfd()) != channels_.end());
     int index = channel->getIndex();
     assert(index >= 0 && index < static_cast<int>(pollfds_.size()));
@@ -109,7 +110,7 @@ void PollPoller::removeChannel(Channel * channel) {
     if (static_cast<size_t>(index) != pollfds_.size() - 1) {
         int lastChannel = pollfds_.back().fd;
         struct pollfd &pfd = pollfds_[index];
-        // explicitly inhibit the ADL and any custom swap method
+        // explicitly inhibit the ADL and any customized swap method
         std::swap(pfd, pollfds_.back());
         if (lastChannel < 0) {
             lastChannel = -lastChannel - 1;

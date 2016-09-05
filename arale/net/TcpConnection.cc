@@ -111,6 +111,8 @@ const char* TcpConnection::stateToString() const {
             return "kConnected";
         case kConnecting:
             return "kConnecting";
+        case kDisconnecting:
+            return "kDisconnecting";
     }
 }
 

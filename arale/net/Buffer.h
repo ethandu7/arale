@@ -9,12 +9,14 @@
 #include <vector>
 #include <algorithm>
 #include <assert.h>
-
+#include <string>
 
 namespace arale {
 
 namespace net {
 
+// this Buffer class is not thread safe
+// copyable
 class Buffer {
 public:
     static const size_t kCheapPrependSize = 8;
@@ -28,8 +30,13 @@ public:
         assert(writableBytes() == initialSize);
         assert(readableBytes() == 0);
     }
+
+    //////////////////////////////////////////////////////////////////
+    // read interfaces
+    //////////////////////////////////////////////////////////////////
+    size_t readableBytes() { return writeIndex_ - readIndex_; }
     
-    size_t readableBytes() const { return writeIndex_ - readIndex_; }
+    char* peek() { return begin() + readIndex_; }
 
     void retrieveAll() {
         readIndex_ = writeIndex_ = kCheapPrependSize;
@@ -44,21 +51,108 @@ public:
         }
     }
 
-    size_t writableBytes() const { return buffer_.size() - writeIndex_; }
-
-    void ensureWritableBytes(size_t len) {
-        if (writableBytes() < len) {
-            makeSpace(len);
-        }
-        assert(writableBytes() >= len);
+    void retrieveUntil(const char *end) {
+        //assert(end <= beginWrite());
+        assert(end <= begin() + writeIndex_);
+        assert(peek() <= end);
+        retrieve(end - peek());
     }
 
+    void retrieveInt8() { retrieve(sizeof(int8_t)); }
+    void retrieveInt16() { retrieve(sizeof(int16_t)); }
+    void retrieveInt32() { retrieve(sizeof(int32_t)); }
+    void retrieveInt64() { retrieve(sizeof(int64_t)); }
+
+    std::string retrieveAsString(size_t len) {
+        assert(len <= readableBytes());
+        std::string result(peek(), len);
+        retrieve(len);
+        return result;
+    }
+
+    std::string retrieveAllAsString() {
+        return retrieveAsString(readableBytes());
+    }
+
+    StringPiece toStringPiece() {
+        return StringPiece(peek(), static_cast<int>(readableBytes()));
+    }
+    
+    int8_t peekInt8() {
+        assert(readableBytes() >= sizeof(int8_t));
+        int8_t x = *peek();
+        return x;
+    }
+
+    int16_t peekInt16() {
+        int16_t x = 0;
+        assert(readableBytes() >= sizeof(x));
+        memcpy(&x, peek(), sizeof(x));
+        return sockets::networkToHost16(x);
+    }
+
+    int32_t peekInt32() {
+        int32_t x = 0;
+        assert(readableBytes() >= sizeof(x));
+        memcpy(&x, peek(), sizeof(x));
+        return sockets::networkToHost32(x);
+    }
+
+    int64_t peekInt64() {
+        int64_t x = 0;
+        assert(readableBytes() >= sizeof(x));
+        memcpy(&x, peek(), sizeof(x));
+        return sockets::networkToHost64(x);
+    }
+
+    int8_t readInt8() {
+        int8_t res = peekInt8();
+        retrieveInt8();
+        return res;
+    }
+
+    int16_t readInt16() {
+        int16_t res = peekInt16();
+        retrieveInt16();
+        return res;
+    }
+
+    int32_t readInt32() {
+        int32_t res = peekInt32();
+        retrieveInt32();
+        return res;
+    }
+
+    int64_t readInt64() {
+        int64_t res = peekInt64();
+        retrieveInt64();
+        return res;
+    }
+
+    //////////////////////////////////////////////////////////////////
+    // write interfaces
+    //////////////////////////////////////////////////////////////////
+
+    size_t writableBytes() { return buffer_.size() - writeIndex_; }
+    
     char* beginWrite() { return begin() + writeIndex_; }
 
     void hasWritten(size_t len) {
         assert(len <= writableBytes());
         writeIndex_ += len;
     }
+
+    void unwrite(size_t len) {
+        assert(len < readableBytes());
+        writeIndex_ += len;
+    }
+    
+    void ensureWritableBytes(size_t len) {
+            if (writableBytes() < len) {
+                makeSpace(len);
+            }
+            assert(writableBytes() >= len);
+        }
 
     void append(const char* data, size_t len) {
         ensureWritableBytes(len);

@@ -32,6 +32,27 @@ public:
     }
 
     //////////////////////////////////////////////////////////////////
+    // general interfaces
+    //////////////////////////////////////////////////////////////////
+
+    void swap(Buffer &rhs) {
+        buffer_.swap(rhs.buffer_);
+        std::swap(readIndex_, rhs.readIndex_);
+        std::swap(writeIndex_, rhs.writeIndex_);
+    }
+
+    size_t internalCapacity()
+    {
+        return buffer_.capacity();
+    }
+
+    /// Read data directly into buffer.
+    ///
+    /// It may implement with readv(2)
+    /// @return result of read(2), @c errno is saved 
+    ssize_t readFd(int fd, int *saveErrno);
+
+    //////////////////////////////////////////////////////////////////
     // read interfaces
     //////////////////////////////////////////////////////////////////
     size_t readableBytes() { return writeIndex_ - readIndex_; }
@@ -185,11 +206,33 @@ public:
         append(&be64, sizeof(be64));
     }
 
-    /// Read data directly into buffer.
-    ///
-    /// It may implement with readv(2)
-    /// @return result of read(2), @c errno is saved 
-    ssize_t readFd(int fd, int *saveErrno);
+    size_t prependableSize() { return readIndex_; }
+
+    void prepend(const void *data, size_t len) {
+        assert(len <= prependableSize());
+        readIndex_ -= len;
+        const char *d = static_cast<const char *>(data);
+        std::copy(d, d + len, begin() + readIndex_);
+    }
+
+    void prependInt8(int8_t data) {
+        prepend(&data, sizeof(data));
+    }
+
+    void prependInt16(int16_t data) {
+        int16_t be16 = sockets::hostToNetwork16(data);
+        prepend(&be16, sizeof(be16));
+    }
+
+    void prependInt32(int32_t data) {
+        int32_t be32 = sockets::hostToNetwork32(data);
+        prepend(&be32, sizeof(be32));
+    }
+
+    void prependInt64(int64_t data) {
+        int64_t be64 = sockets::hostToNetwork64(data);
+        prepend(&be64, sizeof(be64));
+    }
 
 private:
     // don't return iterator

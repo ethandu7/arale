@@ -52,6 +52,8 @@ public:
     void setIndex(int index) { index_ = index; }
     int getIndex() { return index_; }
     int getEvents() { return events_; }
+    bool isReading() { return events_ & kReadEvent; }
+    bool isWriting() { return events_ & kWriteEvent; }
     bool isNoneEvent() { return events_ == kNoneEvent; }
     EventLoop* getEventLoop() { return loop_; }
 

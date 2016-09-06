@@ -62,6 +62,9 @@ public:
     void connectionEstablished();
     void connectionDestroyed();
 
+    void send(const void* data, size_t len);
+    void shutdown();
+
     const char* stateToString() const;
     
 private:
@@ -69,6 +72,9 @@ private:
     void handleWrite();
     void handleClose();
     void handleError();
+
+    void shutdownInLoop();
+    void sendInLoop(const void *data, size_t len);
     
     EventLoop *loop_;
     const std::string name_;
@@ -77,6 +83,7 @@ private:
     std::unique_ptr<Channel> readWriteChannel_;
     InetAddress localAddr_;
     InetAddress remoteAddr_;
+    size_t highWaterMark_;
     Buffer inputBuffer_;
     Buffer outputBuffer_;
     ConnectionCallback connectionCallback_;

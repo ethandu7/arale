@@ -80,8 +80,8 @@ private:
     // 2.  existing connection close(passive or initiative)
     // 3.  get data from peer
     // 3.5 finish writing data to peer
-    // here we give the library user a chance to customize the handler for event 1, 3 and 3.5
-    // but we will fully control what would happen when event 2 happens
+    // here we give the library user a chance to customize the handler for event 3 and 3.5
+    // but we will fully control what would happen when event 1 and 2 happens
     ConnectionCallback connectionCallback_;
     MessageCallback messageCallback_;
     WriteCompleteCallback writeCompleteCallback_;

@@ -5,6 +5,7 @@
 #include <arale/net/Callbacks.h>
 #include <arale/net/InetAddress.h>
 #include <arale/net/Buffer.h>
+#include <arale/net/Socket.h>
 
 #include <string>
 #include <memory>
@@ -59,6 +60,9 @@ public:
         closeCallback_ = cb;
     }
 
+    bool getTcpInfo(struct tcp_info *tcpi) const ;
+    std::string getTcpInfoString() const ;
+    
     void connectionEstablished();
     void connectionDestroyed();
 

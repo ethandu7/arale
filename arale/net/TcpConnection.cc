@@ -52,6 +52,17 @@ TcpConnection::~TcpConnection() {
     assert(state_ == kDisconnected);
 }
 
+bool TcpConnection::getTcpInfo(struct tcp_info *tcpi) const {
+    return socket_->getTcpInfo(tcpi);
+}
+
+std::string TcpConnection::getTcpInfoString() const {
+    char buf[1024];
+    buf[0] = '\0';
+    socket_->getTcpInfoString(buf, sizeof(buf));
+    return buf;
+}
+
 void TcpConnection::connectionEstablished() {
     loop_->assertInLoopThread();
     assert(state_ == kConnecting);

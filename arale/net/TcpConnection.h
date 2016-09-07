@@ -36,8 +36,9 @@ public:
     const InetAddress& remoteAddr() { return remoteAddr_; }
 
     bool isConnected() { return state_ == kConnected; }
+    bool isReading() { return reading_; }
 
-    // those setters are called only by TcpServer and TcpClent
+    // those setters are called only by TcpServer and TcpClient
     // that means users should provide callbacks before get or send data
     // do NOT set those callbacks by using TcpConnction object directly
     void setConnectionCallback(const ConnectionCallback& cb) {
@@ -68,8 +69,13 @@ public:
 
     void send(const void* data, size_t len);
     void shutdown();
+    void startRead();
+    void stopRead();
+    void forceClose();
+    void forceCloseWithDelay(double seconds);
 
     const char* stateToString() const;
+    void setTcpNoDelay(bool on) { socket_->setTcpNoDelay(on); }
     
 private:
     void handleRead(Timestamp receiveTime);
@@ -79,6 +85,9 @@ private:
 
     void shutdownInLoop();
     void sendInLoop(const void *data, size_t len);
+    void startReadInLoop();
+    void stopReadInLoop();
+    void forceCloseInLoop();
     
     EventLoop *loop_;
     const std::string name_;
@@ -90,6 +99,7 @@ private:
     size_t highWaterMark_;
     Buffer inputBuffer_;
     Buffer outputBuffer_;
+    bool reading_;
     ConnectionCallback connectionCallback_;
     MessageCallback messageCallback_;
     WriteCompleteCallback writeCompleteCallback_;

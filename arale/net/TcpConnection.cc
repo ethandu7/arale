@@ -1,5 +1,7 @@
 
 #include <arale/base/Logging.h>
+#include <arale/base/WeakCallback.h>
+
 #include <arale/net/TcpConnection.h>
 #include <arale/net/Socket.h>
 #include <arale/net/Channel.h>
@@ -33,7 +35,8 @@ TcpConnection::TcpConnection(EventLoop *loop, const string &name, int sockfd,
       readWriteChannel_(new Channel(loop_, sockfd)),
       localAddr_(localaddr),
       remoteAddr_(remoteaddr),
-      highWaterMark_(64*1024*1024) {
+      highWaterMark_(64*1024*1024),
+      reading_(false) {
     readWriteChannel_->setReadCallback(std::bind(&TcpConnection::handleRead, this, _1));
     readWriteChannel_->setWriteCallback(std::bind(&TcpConnection::handleWrite, this));
     readWriteChannel_->setCloseCallback(std::bind(&TcpConnection::handleClose, this));
@@ -222,6 +225,53 @@ void TcpConnection::sendInLoop(const void *data, size_t len) {
     }
 }
 
+void TcpConnection::forceClose() {
+    if (state_ == kConnected || state_ == kDisconnecting) {
+        setState(kDisconnecting);
+        loop_->runInLoop(std::bind(&TcpConnection::forceCloseInLoop, this));
+    }
+}
+
+void TcpConnection::forceCloseInLoop() {
+    loop_->assertInLoopThread();
+    assert(state_ == kDisconnecting);
+    handleClose();
+}
+
+void TcpConnection::forceCloseWithDelay(double seconds) {
+    if (state_ == kConnected || state_ == kDisconnecting) {
+        setState(kDisconnecting);
+        loop_->runAfter(seconds, makeWekaCallback(shared_from_this(), 
+            &TcpConnection::forceClose));
+    }
+}
+
+void TcpConnection::startRead() {
+    assert(state_ == kConnected);
+    loop_->runInLoop(std::bind(&TcpConnection::startReadInLoop, this));
+}
+
+void TcpConnection::startReadInLoop() {
+    loop_->assertInLoopThread();
+    if (!reading_ || !readWriteChannel_->isReading()) {
+        readWriteChannel_->enableRead();
+        reading_ = true;
+    }
+}
+
+void TcpConnection::stopRead() {
+    assert(state_ ==kConnected);
+    loop_->runInLoop(std::bind(&TcpConnection::stopReadInLoop, this));
+}
+
+void TcpConnection::stopReadInLoop() {
+    loop_->assertInLoopThread();
+    if (reading_ || readWriteChannel_->isReading()) {
+        readWriteChannel_->disableRead();
+        reading_ = false;
+    }
+}
+    
 const char* TcpConnection::stateToString() const {
     switch (state_) {
         case kDisconnected:

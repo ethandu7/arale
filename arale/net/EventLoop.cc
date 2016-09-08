@@ -7,6 +7,7 @@
 #include <arale/net/Channel.h>
 
 #include <sys/eventfd.h>
+#include <signal.h>
 
 using namespace arale::net;
 
@@ -26,12 +27,25 @@ int creatWeakupFd() {
     }
     return evtfd;
 }
+
+
+class IgnorSigPipe {
+public:
+    IgnorSigPipe() {
+        signal(SIGPIPE, SIG_IGN);
+    }
+};
+
+IgnorSigPipe ignorObj;
     
 }
 
 namespace arale {
 
 namespace net {
+
+//#pragma GCC diagnostic ignored "-Wold-style-cast"
+//#pragma GCC diagnostic error "-Wold-style-cast"
 
 EventLoop::EventLoop() :
     threadID_(base::getCurrentThreadID()),

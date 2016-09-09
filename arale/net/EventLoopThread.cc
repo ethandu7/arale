@@ -6,8 +6,9 @@ namespace arale {
 
 namespace net {
 
-EventLoopThread::EventLoopThread(const ThreadInitCallback &callback)
+EventLoopThread::EventLoopThread(const std::string &name, const ThreadInitCallback &callback)
     : loop_(NULL),
+      name_(name),
       exiting_(false),
       start_(false),
       initCallback_(callback),

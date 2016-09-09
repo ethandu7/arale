@@ -6,6 +6,7 @@
 #include <memory>
 #include <mutex>
 #include <condition_variable>
+#include <string>
 
 namespace arale {
 
@@ -16,15 +17,18 @@ class EventLoop;
 class EventLoopThread {
 public:
     typedef std::function<void (EventLoop*)> ThreadInitCallback;
-    EventLoopThread(const ThreadInitCallback &callback);
+    EventLoopThread(const std::string &name, const ThreadInitCallback &callback);
     EventLoopThread(const EventLoopThread&) = delete;
     EventLoopThread& operator=(const EventLoopThread&) = delete;
     ~EventLoopThread();
     EventLoop* startLoop();
 
+    const std::string getName() { return name_; }
+
 private:
     void threadFunc();
     EventLoop* loop_;
+    std::string name_;
     bool exiting_;
     bool start_;
     std::mutex mutex_;    

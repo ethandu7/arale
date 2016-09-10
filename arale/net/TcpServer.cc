@@ -4,6 +4,7 @@
 #include <arale/net/Acceptor.h>
 #include <arale/net/TcpServer.h>
 #include <arale/net/SocketsOps.h>
+#include <arale/net/EventLoopThreadPool.h>
 
 namespace arale {
 
@@ -20,6 +21,7 @@ TcpServer::TcpServer(EventLoop* loop,
       ipPort_(serveraddr.toIpPort()),
       nextConnId_(1),
       accptor_(new Acceptor(loop, serveraddr, option == kReusePort)),
+      threadPool_(new EventLoopThreadPool(loop, name_)),
       connectionCallback_(defaultConnectionCallback),
       messageCallback_(defaultMessageCallback) {
     accptor_->setNewConnectionCallback(
@@ -46,6 +48,7 @@ TcpServer::~TcpServer() {
 
 void TcpServer::newConncetion(int newconnfd, const InetAddress &peeraddr) {
     loop_->assertInLoopThread();
+    EventLoop* loop = threadPool_->getNextLoop();
     char buf[64];
     snprintf(buf, sizeof(buf), "-%s#%d", ipPort_.c_str(), nextConnId_);
     ++nextConnId_;
@@ -56,7 +59,7 @@ void TcpServer::newConncetion(int newconnfd, const InetAddress &peeraddr) {
              << "] from " << peeraddr.toIpPort();
 
     InetAddress localaddr(sockets::getLocalAddr(newconnfd));
-    TcpConnctionPtr newConn = std::make_shared<TcpConnection>(loop_, connName, newconnfd,
+    TcpConnctionPtr newConn = std::make_shared<TcpConnection>(loop, connName, newconnfd,
                                                                 localaddr, peeraddr);
     newConn->setConnectionCallback(connectionCallback_);
     newConn->setMessageCallback(messageCallback_);
@@ -64,7 +67,7 @@ void TcpServer::newConncetion(int newconnfd, const InetAddress &peeraddr) {
     newConn->setCloseCallback(std::bind(&TcpServer::removeConnection, this, _1));
     connections_[connName] = newConn;
     // here you can use shared_ptr object to replace a pointor to TcpConnection object
-    loop_->runInLoop(std::bind(&TcpConnection::connectionEstablished, newConn));
+    loop->runInLoop(std::bind(&TcpConnection::connectionEstablished, newConn));
 }
 
 void TcpServer::removeConnection(const TcpConnctionPtr &connection) {
@@ -98,9 +101,14 @@ void TcpServer::removeConnectionInLoop(const TcpConnctionPtr &conn) {
 
 void TcpServer::start() {
     if (started_.getAndAdd(1) == 0) {
+        threadPool_->start(threadInitCallback_);
         assert(!accptor_->isListening());
         loop_->runInLoop(std::bind(&Acceptor::startListening, accptor_.get()));
     }
+}
+
+void TcpServer::setThreadNum(int num) {
+    threadPool_->setThreadNum(num);
 }
 
 }

@@ -16,11 +16,11 @@ class EventLoop;
 // we don't need this because in .cc we don't use this
 //class InetAddress;
 class Acceptor;
+class EventLoopThreadPool;
 
 class TcpServer {
 public:
-    // for thread pool, not right now
-    //typedef std::function<void (EventLoop*)> ThreadInitCallback; 
+    typedef std::function<void (EventLoop*)> ThreadInitCallback; 
 
     enum Option {
         kNoReusePort,
@@ -44,6 +44,7 @@ public:
     EventLoop* getLoop() { return loop_; }
 
     void start();
+    void setThreadNum(int num);
 
     void setConnectionCallback(const ConnectionCallback& callback) {
         connectionCallback_ = callback;
@@ -56,7 +57,11 @@ public:
     void setWriteCompleteCallback(const WriteCompleteCallback& callback) {
         writeCompleteCallback_ = callback;
     }
-    
+
+    void setThreadInitCallback(const ThreadInitCallback &callback) {
+        threadInitCallback_ = callback;
+    }
+     
 private:
     void newConncetion(int newconnfd, const InetAddress& peeraddr);
     void removeConnection(const TcpConnctionPtr&);
@@ -73,6 +78,7 @@ private:
     const std::string ipPort_;
     int nextConnId_;
     std::unique_ptr<Acceptor> accptor_;
+    std::unique_ptr<EventLoopThreadPool> threadPool_;
     ConnectionMap connections_;
     AtomicInt32 started_;
     // three and a half events need to be concerned in networking programming(according to Chen Shou)
@@ -85,6 +91,7 @@ private:
     ConnectionCallback connectionCallback_;
     MessageCallback messageCallback_;
     WriteCompleteCallback writeCompleteCallback_;
+    ThreadInitCallback threadInitCallback_;
 };
 
 

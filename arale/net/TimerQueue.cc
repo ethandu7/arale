@@ -127,7 +127,13 @@ void TimerQueue::cancelTimerInLoop(TimerID timer) {
         // whereas it will call the deconstructor of the inside objects
         // if we don't want to use delete here, we can useing scoped_ptr instead of raw pointer
         delete it->first;
-    } else if (isInHandlingTimeout_) {
+    } else if (isHandlingTimeout_) {
+        // the isHandlingTimeout_ is for self-cancel, the timer handler wants to
+        // cancel itself
+        // when we get here, the timer is not in the timers_ nor in the activeTimers_
+        // it's only in a temporary set, see the function getExpiredTimers
+        // we need to remeber which timer is canceled by itself
+        // then we will not handle this timer again, see code in function resetTimers
         std::pair<ActiveTimerSet::iterator, bool> result 
             = cancelledTimers_.insert(canceledTimer);
         assert(result.second);
@@ -219,12 +225,12 @@ void TimerQueue::handleTimeout() {
     readTimerfd(timerfd_, now);
 
     std::vector<Entry> expiredTimers = getExpiredTimers(now);
-    isInHandlingTimeout_ = true;
+    isHandlingTimeout_ = true;
     cancelledTimers_.clear();
     for (auto it = expiredTimers.begin(); it != expiredTimers.end(); ++it) {
         it->second->run();
     }
-    isInHandlingTimeout_ = false;
+    isHandlingTimeout_ = false;
     resetTimers(expiredTimers, now);
     assert(timers_.size() == activeTimers_.size());
 }

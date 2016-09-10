@@ -31,6 +31,10 @@ private:
     const TimerCallback timerCallback_;
     Timestamp expiration_;
     const double interval_;
+    // in TimerQueue we use timer's address as key to sort timers
+    // there may have a chance that two timers have the same address but one
+    // is crated after another one which has the same address is already deleted
+    // so we add a sequence to every timer, the counter is unique to every timer
     const int64_t sequence_;
 
     static AtomicInt64 counter_;

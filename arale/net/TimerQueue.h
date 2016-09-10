@@ -48,11 +48,14 @@ private:
     EventLoop *loop_;
     const int timerfd_;
     Channel timerfdChannel_;
+    // the timers_ and activeTimers_ have the same timers
+    // but the timers in timers_ are sorted by timeout value
+    // the timers in activeTimers_ are sotrted by the address of timers
     TimerSet timers_;
 
     // for cancel functionality
     ActiveTimerSet activeTimers_;
-    bool isInHandlingTimeout_;
+    bool isHandlingTimeout_;
     ActiveTimerSet cancelledTimers_;
 };
 

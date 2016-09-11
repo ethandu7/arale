@@ -17,6 +17,7 @@ TcpConnection.cc
 Buffer.cc
 EventLoopThread.cc
 EventLoopThreadPool.cc
+Connector.cc
 )
 
 add_library(arale_net ${net_SRCS})

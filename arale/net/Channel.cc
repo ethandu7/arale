@@ -48,6 +48,7 @@ void Channel::tieTo(const  std::shared_ptr<void> &obj) {
 }
 
 void Channel::handleEvent(Timestamp receiveTime) {
+    // make sure when do the callback, the object callback is runing on is still there
     std::shared_ptr<void> guard;
     if (tied_) {
         guard = tie_.lock();

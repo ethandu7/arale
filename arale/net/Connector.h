@@ -15,6 +15,9 @@ class Channel;
 class Connector : public std::enable_shared_from_this<Connector> {
 public:
     typedef std::function<void (int)> NewConnectionCallback;
+
+    enum State { kDisconnected, kConnecting, kConnected };
+    
     Connector(EventLoop *loop, const InetAddress &serverAddr);
     Connector(const Connector&) = delete;
     Connector& operator=(const Connector&) = delete;
@@ -26,6 +29,8 @@ public:
     void setNewConnectionCallback(const NewConnectionCallback &callback) {
         connectionCallback_ = callback;
     }
+
+    void setState(State s) { state_ = s; }
 
 private:
     static const int kMaxRetryDelayMs = 30 * 1000;
@@ -45,6 +50,7 @@ private:
     InetAddress serverAddr_;
     std::unique_ptr<Channel> connectChannel_;
     NewConnectionCallback connectionCallback_;
+    State state_;
     bool connected_;
     int retryDelayMs_;
 };

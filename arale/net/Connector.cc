@@ -14,6 +14,7 @@ namespace net {
 Connector::Connector(EventLoop *loop, const InetAddress &serverAddr)
     : loop_(loop),
       serverAddr_(serverAddr),
+      state_(kDisconnected),
       connected_(false),
       retryDelayMs_(kInitRetryDelayMs) {
 
@@ -30,6 +31,7 @@ void Connector::start() {
 
 void Connector::startInLoop() {
     loop_->assertInLoopThread();
+    assert(state_ == kDisconnected);
     if (connected_) {
         connect();
     } else {
@@ -79,6 +81,7 @@ void Connector::connecting(int sockfd) {
     loop_->assertInLoopThread();
     assert(connected_);
     assert(!connectChannel_);
+    setState(kConnecting);
     connectChannel_.reset(new Channel(loop_, sockfd));
     // when socket is writeable, the connection is establised
     connectChannel_->setWriteCallback(std::bind(&Connector::handleWrite, this));
@@ -88,6 +91,7 @@ void Connector::connecting(int sockfd) {
 
 // the connection is establised
 void Connector::handleWrite() {
+    assert(state_ == kConnecting);
     int sockfd = removeAndResetChannel();
     int err = sockets::getSocketError(sockfd);
     if (err) {
@@ -97,11 +101,13 @@ void Connector::handleWrite() {
     } else if (sockets::isSelfConnect(sockfd)) {
         LOG_WARN << "Connector::handleWrite - Self connect";
         retry(sockfd);
-    } else {
+    } else {      
         if (connected_) {
+            setState(kConnected);
             connectionCallback_(sockfd);
         } else {
             sockets::close(sockfd);
+            setState(kDisconnected);
         }
     }
 }
@@ -123,6 +129,7 @@ void Connector::resetChannel() {
 // precondition: the channel associated with the socket must be removed from poller 
 void Connector::retry(int sockfd) {
     sockets::close(sockfd);
+    setState(kDisconnected);
     if (connected_) {
         LOG_INFO << "Connector::retry - Retry connecting to " << serverAddr_.toIpPort()
                  << " in " << retryDelayMs_<< " milliseconds. ";
@@ -135,10 +142,14 @@ void Connector::retry(int sockfd) {
 }
 
 void Connector::handleError() {
-    int sockfd = removeAndResetChannel();
-    int err = sockets::getSocketError(sockfd);
-    LOG_TRACE << "SO_ERROR = " << err << " " << strerror_tl(err);
-    retry(sockfd);
+    LOG_ERROR << "Connector::handleError state=" << state_;
+    // I don't know why we do this check
+    if (state_ == kConnecting) {
+        int sockfd = removeAndResetChannel();
+        int err = sockets::getSocketError(sockfd);
+        LOG_TRACE << "SO_ERROR = " << err << " " << strerror_tl(err);
+        retry(sockfd);
+    }
 }
 
 void Connector::stop() {
@@ -148,13 +159,18 @@ void Connector::stop() {
 
 void Connector::stopInLoop() {
     loop_->assertInLoopThread();
-    int sockfd = removeAndResetChannel();
-    retry(sockfd);
+    // if we are in the other states, we cannot do stop at all
+    if (state_ == kConnecting) {
+        setState(kDisconnected);
+        int sockfd = removeAndResetChannel();
+        retry(sockfd);
+    }
 }
 
 void Connector::restart() {
     loop_->assertInLoopThread();
     connected_ = true;
+    setState(kDisconnected);
     retryDelayMs_ = kInitRetryDelayMs;
     startInLoop();
 }

@@ -49,6 +49,7 @@ private:
     EventLoop *loop_;
     InetAddress serverAddr_;
     std::unique_ptr<Channel> connectChannel_;
+    // will be called after connection is establised, before get any data from peer
     NewConnectionCallback connectionCallback_;
     State state_;
     bool connected_;

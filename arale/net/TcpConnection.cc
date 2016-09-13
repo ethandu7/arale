@@ -23,7 +23,7 @@ void defaultConnectionCallback(const TcpConnctionPtr &conn) {
 }
 
 void defaultMessageCallback(const TcpConnctionPtr & conn, Buffer *buf, Timestamp receiveTime) {
-    //buf->retrieveAll();
+    buf->retrieveAll();
 }
 
 TcpConnection::TcpConnection(EventLoop *loop, const string &name, int sockfd,

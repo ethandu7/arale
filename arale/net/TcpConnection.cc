@@ -282,6 +282,8 @@ const char* TcpConnection::stateToString() const {
             return "kConnecting";
         case kDisconnecting:
             return "kDisconnecting";
+        default:
+            return "unknown state";
     }
 }
 

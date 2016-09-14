@@ -28,13 +28,14 @@ int creatWeakupFd() {
     return evtfd;
 }
 
-
+#pragma GCC diagnostic ignored "-Wold-style-cast"
 class IgnorSigPipe {
 public:
     IgnorSigPipe() {
         signal(SIGPIPE, SIG_IGN);
     }
 };
+#pragma GCC diagnostic error "-Wold-style-cast"
 
 IgnorSigPipe ignorObj;
     

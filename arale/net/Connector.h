@@ -31,6 +31,7 @@ public:
     }
 
     void setState(State s) { state_ = s; }
+    const InetAddress& getServerAddress() { return serverAddr_; }
 
 private:
     static const int kMaxRetryDelayMs = 30 * 1000;

@@ -19,6 +19,8 @@ TcpClient::TcpClient(EventLoop *loop, const string &name, const InetAddress &ser
     : loop_(loop),
       name_(name),
       connID_(1),
+      retry_(false),
+      connect_(true),
       connector_(new Connector(loop, serverAddr)),
       connectionCallback_(defaultConnectionCallback),
       messageCallback_(defaultMessageCallback) {
@@ -43,13 +45,54 @@ void TcpClient::newConnection(int sockfd) {
     conn->setMessageCallback(messageCallback_);
     conn->setConnectionCallback(connectionCallback_);
     conn->setWriteCompleteCallback(writeCompleteCallback_);
-
-    // don't know why
+    conn->setCloseCallback(std::bind(&TcpClient::removeConnection, this, _1));
     {
         std::lock_guard<std::mutex> guard(mutex_);
-        connector_ = conn;
+        connection_ = conn;
     }
     loop_->runInLoop(std::bind(&TcpConnection::connectionEstablished, conn));
+}
+
+void TcpClient::removeConnection(const TcpConnctionPtr &connection) {
+    loop_->assertInLoopThread();
+    assert(loop_ == connection->getLoop());
+    assert(connection_ == connection);
+    {
+        std::lock_guard<std::mutex> guard(mutex_);
+        connection_.reset();
+    }
+    loop_->postFuntor(std::bind(&TcpConnection::connectionDestroyed, connection));
+    // if user shutdown explicitly, we don't retry
+    if (retry_ || connect_) {
+        LOG_INFO << "TcpClient::connect[" << name_ << "] - Reconnecting to "
+                 << connector_->getServerAddress().toIpPort();
+        connector_->restart();
+    }
+}
+
+void TcpClient::connect() {
+    LOG_INFO << "TcpClient::connect[" << name_ << "] - connecting to "
+             << connector_->getServerAddress().toIpPort();
+    connect_ = true;
+    // don't worry about the run this in io thread
+    // the connector will take care of this
+    // give the user a chance to call this funciton not in io thread
+    connector_->start();
+}
+
+void TcpClient::stop() {
+    connect_ = false;
+    connector_->stop();
+}
+
+void TcpClient::disconnect() {
+    connect_ = false;
+    {
+        std::lock_guard<std::mutex> guard(mutex_);
+        if (connection_) {
+            connection_->shutdown();
+        }
+    }
 }
 
 }

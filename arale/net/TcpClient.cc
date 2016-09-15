@@ -9,6 +9,15 @@
 #include <functional>
 #include <stdio.h>
 
+using namespace arale::net;
+namespace {
+
+void removeTcpConnection(EventLoop* loop, const TcpConnctionPtr& conn) {
+    loop->postFuntor(std::bind(&TcpConnection::connectionDestroyed, conn));
+}
+
+}
+
 namespace arale {
 
 namespace net {
@@ -30,7 +39,29 @@ TcpClient::TcpClient(EventLoop *loop, const string &name, const InetAddress &ser
 }
 
 TcpClient::~TcpClient() {
-
+    LOG_INFO << "TcpClient::~TcpClient[" << name_
+             << "] - connector " << connector_.get();
+    TcpConnctionPtr conn;
+    bool unique = false;
+    {
+        std::lock_guard<std::mutex> guard(mutex_);
+        unique = connection_.unique();
+        conn = connection_;
+    }
+    if (conn) {
+        assert(loop_ == conn->getLoop());
+        CloseCallback callback = std::bind(removeTcpConnection, loop_, _1);
+        // we got make sure any operation on TcpConnetion object happens in io thread
+        // why do we make indirect call two times, why can't we just indirectily call
+        // TcpConnection::connectionDestroyed ???
+        loop_->runInLoop(std::bind(&TcpConnection::setCloseCallback, conn, callback));
+        // if we are the last one to hold this connection
+        if (unique) {
+            conn->forceClose();
+        }
+    } else {
+        connector_->stop();
+    }
 }
 
 void TcpClient::newConnection(int sockfd) {
@@ -41,7 +72,7 @@ void TcpClient::newConnection(int sockfd) {
     ++connID_;
     std::string connName = name_ + buf;
     InetAddress localAddr(sockets::getLocalAddr(sockfd));
-    TcpConnctionPtr conn(new TcpConnection(loop_, connName, sockfd, localAddr, peerAddr));
+    TcpConnctionPtr conn(std::make_shared<TcpConnection>(loop_, connName, sockfd, localAddr, peerAddr));
     conn->setMessageCallback(messageCallback_);
     conn->setConnectionCallback(connectionCallback_);
     conn->setWriteCompleteCallback(writeCompleteCallback_);

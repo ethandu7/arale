@@ -64,6 +64,9 @@ public:
     // why can't the type of parameter be weak_ptr???
     void tieTo(const std::shared_ptr<void> &obj);
 
+    std::string eventsToString();
+    std::string eventsToString(int fd, int event);
+
 private:
     void update();
     void handleEventWithGuard(Timestamp receiveTime);

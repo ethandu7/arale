@@ -124,7 +124,35 @@ void EPollPoller::removeChannel(Channel *channel) {
 }
 
 void EPollPoller::update(int operation, Channel *ch) {
+    struct epoll_event event;
+    bzero(&event, sizeof(event));
+    event.events = ch->getEvents();
+    event.data.ptr = ch;
+    int fd = ch->getfd();
+    LOG_TRACE << "epoll_ctl op = " << operationToString(operation)
+              << " fd = " << fd << " event = { " << ch->eventsToString() << " }";
+    int ret = epoll_ctl(epollfd_, operation, fd, &event);
+    if (ret < 0) {
+        if (operation == kDeleted) {
+            LOG_SYSERR << "epoll_ctl op =" << operationToString(operation) << " fd =" << fd;
+        } else {
+            LOG_SYSFATAL << "epoll_ctl op =" << operationToString(operation) << " fd =" << fd;
+        }
+    }
+}
 
+const char* EPollPoller::operationToString(int operation) {
+    switch (operation) {
+        case EPOLL_CTL_ADD:
+            return "ADD";
+        case EPOLL_CTL_DEL:
+            return "DEL";
+        case EPOLL_CTL_MOD:
+            return "MOD";
+        default:
+            assert(false && "ERROR operation");
+            return "Unknown Operation";
+    }
 }
 
 }

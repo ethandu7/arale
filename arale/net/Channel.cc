@@ -3,6 +3,7 @@
 #include <arale/net/Channel.h>
 #include <arale/net/EventLoop.h>
 #include <poll.h>
+#include <sstream>
 
 
 namespace arale {
@@ -93,6 +94,31 @@ void Channel::handleEventWithGuard(Timestamp receiveTime) {
     }
 
     isHandlingEvent_ = false;
+}
+
+std::string Channel::eventsToString() {
+    return eventsToString(fd_, events_);
+}
+
+std::string Channel::eventsToString(int fd, int event) {
+    std::ostringstream oss;
+    oss << fd << ":";
+    if (event & POLLIN)
+        oss << "IN";
+    if (event & POLLPRI)
+        oss << "PRI";
+    if (event & POLLOUT)
+        oss << "OUT";
+    if (event & POLLHUP)
+        oss << "HUP";
+    if (event & POLLRDHUP)
+        oss << "RDHUP";
+    if (event & POLLERR)
+        oss << "ERR";
+    if (event & POLLNVAL)
+        oss << "NVAL";
+
+    return oss.str().c_str();
 }
 
 }

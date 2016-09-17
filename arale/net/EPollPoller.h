@@ -26,6 +26,7 @@ private:
     static const int kInitEPollEventListSize = 16;
     void fillActiveChannels(int, ChannelList *);
     void update(int operation, Channel *ch);
+    const char *operationToString(int operation);
 
     int  epollfd_;
     EPollEventList epollEvents_;

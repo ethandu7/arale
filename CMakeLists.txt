@@ -33,7 +33,10 @@ set(CMAKE_CXX_COMPILER "g++")
 set(CMAKE_CXX_FLAGS_DEBUG "-O0")
 set(CMAKE_CXX_FLAGS_RELEASE "-O2 -finline-limit=1000 -DNDEBUG")
 set(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin)
-set(LIBRARY_OUPUT_PATH ${PROJECT_BINARY_DIR}/lib) 
+message(STATUS "EXECUTABLE_OUTPUT_PATH = " ${EXECUTABLE_OUTPUT_PATH})
+set(LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/lib)
+message(STATUS "LIBRARY_OUTPUT_PATH = " ${LIBRARY_OUTPUT_PATH})
+
 message(STATUS "PROJECT_BINARY_DIR = " ${PROJECT_BINARY_DIR})
 
 find_package(Boost REQUIRED)
@@ -48,4 +51,8 @@ message(STATUS "CXX_FLAGS = " ${CMAKE_CXX_FLAGS} " " ${CMAKE_CXX_FLAGS_${BUILD_T
 
 add_subdirectory(arale/base)
 add_subdirectory(arale/net)
+
+add_subdirectory(arale/examples)
+
+
 

@@ -68,6 +68,7 @@ public:
     void connectionDestroyed();
 
     void send(const void* data, size_t len);
+    void send(const std::string &msg);
     void shutdown();
     void startRead();
     void stopRead();

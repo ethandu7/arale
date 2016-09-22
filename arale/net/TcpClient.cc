@@ -12,7 +12,7 @@
 using namespace arale::net;
 namespace {
 
-void removeTcpConnection(EventLoop* loop, const TcpConnctionPtr& conn) {
+void removeTcpConnection(EventLoop* loop, const TcpConnectionPtr& conn) {
     loop->postFuntor(std::bind(&TcpConnection::connectionDestroyed, conn));
 }
 
@@ -41,7 +41,7 @@ TcpClient::TcpClient(EventLoop *loop, const string &name, const InetAddress &ser
 TcpClient::~TcpClient() {
     LOG_INFO << "TcpClient::~TcpClient[" << name_
              << "] - connector " << connector_.get();
-    TcpConnctionPtr conn;
+    TcpConnectionPtr conn;
     bool unique = false;
     {
         std::lock_guard<std::mutex> guard(mutex_);
@@ -72,7 +72,7 @@ void TcpClient::newConnection(int sockfd) {
     ++connID_;
     std::string connName = name_ + buf;
     InetAddress localAddr(sockets::getLocalAddr(sockfd));
-    TcpConnctionPtr conn(std::make_shared<TcpConnection>(loop_, connName, sockfd, localAddr, peerAddr));
+    TcpConnectionPtr conn(std::make_shared<TcpConnection>(loop_, connName, sockfd, localAddr, peerAddr));
     conn->setMessageCallback(messageCallback_);
     conn->setConnectionCallback(connectionCallback_);
     conn->setWriteCompleteCallback(writeCompleteCallback_);
@@ -84,7 +84,7 @@ void TcpClient::newConnection(int sockfd) {
     loop_->runInLoop(std::bind(&TcpConnection::connectionEstablished, conn));
 }
 
-void TcpClient::removeConnection(const TcpConnctionPtr &connection) {
+void TcpClient::removeConnection(const TcpConnectionPtr &connection) {
     loop_->assertInLoopThread();
     assert(loop_ == connection->getLoop());
     assert(connection_ == connection);

@@ -22,7 +22,7 @@ public:
     TcpClient& operator=(const TcpClient&) = delete;
     ~TcpClient();
 
-    TcpConnctionPtr getConnection() {
+    TcpConnectionPtr getConnection() {
         std::lock_guard<std::mutex> guard(mutex_);
         return connection_;
     }
@@ -50,7 +50,7 @@ public:
     }
         
 private:
-    void removeConnection(const TcpConnctionPtr&);
+    void removeConnection(const TcpConnectionPtr&);
     
     EventLoop* loop_;
     const std::string name_;
@@ -59,7 +59,7 @@ private:
     bool connect_;
     std::unique_ptr<Connector>  connector_;
     std::mutex mutex_;
-    TcpConnctionPtr connection_;
+    TcpConnectionPtr connection_;
     ConnectionCallback connectionCallback_;
     MessageCallback messageCallback_;
     WriteCompleteCallback writeCompleteCallback_;

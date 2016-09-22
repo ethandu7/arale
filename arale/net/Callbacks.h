@@ -14,17 +14,17 @@ namespace net {
 class Buffer;
 class TcpConnection;
 
-typedef std::shared_ptr<TcpConnection> TcpConnctionPtr;
+typedef std::shared_ptr<TcpConnection> TcpConnectionPtr;
 
 typedef std::function<void ()> TimerCallback; 
-typedef std::function<void (const TcpConnctionPtr&)> ConnectionCallback;
-typedef std::function<void (const TcpConnctionPtr&)> CloseCallback;
-typedef std::function<void (const TcpConnctionPtr&)> WriteCompleteCallback;
-typedef std::function<void (const TcpConnctionPtr&, size_t)> HighWaterMarkCallback;
-typedef std::function<void (const TcpConnctionPtr&, Buffer*, Timestamp)> MessageCallback;
+typedef std::function<void (const TcpConnectionPtr&)> ConnectionCallback;
+typedef std::function<void (const TcpConnectionPtr&)> CloseCallback;
+typedef std::function<void (const TcpConnectionPtr&)> WriteCompleteCallback;
+typedef std::function<void (const TcpConnectionPtr&, size_t)> HighWaterMarkCallback;
+typedef std::function<void (const TcpConnectionPtr&, Buffer*, Timestamp)> MessageCallback;
 
-void defaultConnectionCallback(const TcpConnctionPtr& conn);
-void defaultMessageCallback(const TcpConnctionPtr& conn, Buffer *buf, Timestamp receiveTime);
+void defaultConnectionCallback(const TcpConnectionPtr& conn);
+void defaultMessageCallback(const TcpConnectionPtr& conn, Buffer *buf, Timestamp receiveTime);
 
 }
 

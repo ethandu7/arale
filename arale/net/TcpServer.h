@@ -64,15 +64,15 @@ public:
      
 private:
     void newConncetion(int newconnfd, const InetAddress& peeraddr);
-    void removeConnection(const TcpConnctionPtr&);
+    void removeConnection(const TcpConnectionPtr&);
     // if a class define any inloop version function, this funnction 
     // can be call from a thread is different from io thread
     //
     // only if you want to add or remove data from loop object you need 
     // define a inloop version for your function
-    void removeConnectionInLoop(const TcpConnctionPtr&);
+    void removeConnectionInLoop(const TcpConnectionPtr&);
     // key is the name of TcpConnection
-    typedef std::map<std::string, TcpConnctionPtr> ConnectionMap;
+    typedef std::map<std::string, TcpConnectionPtr> ConnectionMap;
     EventLoop *loop_;
     const std::string name_;
     const std::string ipPort_;

@@ -38,7 +38,7 @@ TcpServer::~TcpServer() {
     loop_->assertInLoopThread();
     LOG_TRACE << "TcpServer::~TcpServer [" << name_ << "] destructing";
     for(auto it = connections_.begin(); it != connections_.end(); ++it) {
-        TcpConnctionPtr conn = it->second;
+        TcpConnectionPtr conn = it->second;
         it->second.reset();
         EventLoop* ioLoop = conn->getLoop();
         ioLoop->runInLoop(std::bind(&TcpConnection::connectionDestroyed, conn));
@@ -59,7 +59,7 @@ void TcpServer::newConncetion(int newconnfd, const InetAddress &peeraddr) {
              << "] from " << peeraddr.toIpPort();
 
     InetAddress localaddr(sockets::getLocalAddr(newconnfd));
-    TcpConnctionPtr newConn = std::make_shared<TcpConnection>(loop, connName, newconnfd,
+    TcpConnectionPtr newConn = std::make_shared<TcpConnection>(loop, connName, newconnfd,
                                                                 localaddr, peeraddr);
     newConn->setConnectionCallback(connectionCallback_);
     newConn->setMessageCallback(messageCallback_);
@@ -70,11 +70,11 @@ void TcpServer::newConncetion(int newconnfd, const InetAddress &peeraddr) {
     loop->runInLoop(std::bind(&TcpConnection::connectionEstablished, newConn));
 }
 
-void TcpServer::removeConnection(const TcpConnctionPtr &connection) {
+void TcpServer::removeConnection(const TcpConnectionPtr &connection) {
     loop_->runInLoop(std::bind(&TcpServer::removeConnectionInLoop, this, connection));
 }
 
-void TcpServer::removeConnectionInLoop(const TcpConnctionPtr &conn) {
+void TcpServer::removeConnectionInLoop(const TcpConnectionPtr &conn) {
     loop_->assertInLoopThread();
     std::string connName = conn->getName();
     auto it = connections_.find(connName);

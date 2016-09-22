@@ -12,10 +12,10 @@ public:
     void start();
 
 private:
-    void onMessage(const arale::net::TcpConnctionPtr &conn,
+    void onMessage(const arale::net::TcpConnectionPtr &conn,
                     arale::net::Buffer* buf,
                     arale::Timestamp time);
-    void onConnection(const arale::net::TcpConnctionPtr &conn);
+    void onConnection(const arale::net::TcpConnectionPtr &conn);
     arale::net::TcpServer server_;
 };
 

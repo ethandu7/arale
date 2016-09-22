@@ -19,13 +19,13 @@ void DiscardServer::start() {
     server_.start();
 }
 
-void DiscardServer::onConnection(const TcpConnctionPtr &conn) {
+void DiscardServer::onConnection(const TcpConnectionPtr &conn) {
     LOG_INFO << "DiscardServer - " << conn->remoteAddr().toIpPort() << " -> "
              << conn->localAddr().toIpPort() << " is "
              << (conn->isConnected() ? "UP" : "DOWN");
 }
 
-void DiscardServer::onMessage(const TcpConnctionPtr &conn, Buffer *buf, Timestamp time) {
+void DiscardServer::onMessage(const TcpConnectionPtr &conn, Buffer *buf, Timestamp time) {
     std::string msg(buf->retrieveAllAsString());
     LOG_INFO << conn->getName() << " discards " << msg.size()
              << " bytes received at " << time.toString();

@@ -16,13 +16,13 @@ namespace net {
 
 using namespace std::placeholders;
 
-void defaultConnectionCallback(const TcpConnctionPtr &conn) {
+void defaultConnectionCallback(const TcpConnectionPtr &conn) {
     LOG_TRACE << conn->localAddr().toIpPort() << " -> "
               << conn->remoteAddr().toIpPort() << " is "
               << (conn->isConnected() ? "UP" : "DOWN");
 }
 
-void defaultMessageCallback(const TcpConnctionPtr & conn, Buffer *buf, Timestamp receiveTime) {
+void defaultMessageCallback(const TcpConnectionPtr & conn, Buffer *buf, Timestamp receiveTime) {
     buf->retrieveAll();
 }
 
@@ -142,7 +142,7 @@ void TcpConnection::handleClose() {
     setState(kDisconnected);
     // duplicated with the invocation in connectionDestroyed 
     readWriteChannel_->disableAll();
-    TcpConnctionPtr guardThis(shared_from_this());
+    TcpConnectionPtr guardThis(shared_from_this());
     connectionCallback_(guardThis);
     closeCallback_(guardThis);
 }
@@ -181,6 +181,10 @@ void TcpConnection::send(const void *data, size_t len) {
             loop_->runInLoop(std::bind(&TcpConnection::sendInLoop, this, data, len));
         }
     }
+}
+
+void TcpConnection::send(const std::string &msg) {
+    send(msg.c_str(), msg.size());
 }
 
 void TcpConnection::sendInLoop(const void *data, size_t len) {

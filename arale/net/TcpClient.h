@@ -3,6 +3,7 @@
 #define ARALE_NET_TCPCLIENT_H
 
 #include <arale/net/Callbacks.h>
+#include <arale/net/TcpConnection.h>
 
 #include <memory>
 #include <mutex>

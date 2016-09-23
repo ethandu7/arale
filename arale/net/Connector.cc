@@ -11,6 +11,10 @@ namespace arale {
 
 namespace net {
 
+// if no this line, there will be a link problem
+// don't know why, very wired
+const int Connector::kMaxRetryDelayMs;
+
 Connector::Connector(EventLoop *loop, const InetAddress &serverAddr)
     : loop_(loop),
       serverAddr_(serverAddr),

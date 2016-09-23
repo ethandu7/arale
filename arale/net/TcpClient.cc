@@ -4,7 +4,6 @@
 #include <arale/net/EventLoop.h>
 #include <arale/net/Connector.h>
 #include <arale/net/SocketsOps.h>
-#include <arale/net/TcpConnection.h>
 
 #include <functional>
 #include <stdio.h>

@@ -58,7 +58,11 @@ private:
     int connID_;
     bool retry_;
     bool connect_;
-    std::unique_ptr<Connector>  connector_;
+    // this is not right, it will cause Connector::retry crash
+    // root cause is that shared_from_this need the object 
+    // shared from must be pointed to by at least one shared_ptr
+    // std::unique_ptr<Connector>  connector_;
+    std::shared_ptr<Connector> connector_;
     std::mutex mutex_;
     TcpConnectionPtr connection_;
     ConnectionCallback connectionCallback_;

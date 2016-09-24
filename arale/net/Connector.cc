@@ -95,24 +95,31 @@ void Connector::connecting(int sockfd) {
 
 // the connection is establised
 void Connector::handleWrite() {
-    assert(state_ == kConnecting);
-    int sockfd = removeAndResetChannel();
-    int err = sockets::getSocketError(sockfd);
-    if (err) {
-        LOG_WARN << "Connector::handleWrite - SO_ERROR = "
-               << err << " " << strerror_tl(err);
-        retry(sockfd);
-    } else if (sockets::isSelfConnect(sockfd)) {
-        LOG_WARN << "Connector::handleWrite - Self connect";
-        retry(sockfd);
-    } else {      
-        if (connected_) {
-            setState(kConnected);
-            connectionCallback_(sockfd);
-        } else {
-            sockets::close(sockfd);
-            setState(kDisconnected);
+    //assert(state_ == kConnecting);.
+    LOG_TRACE << "Connector::handleWrite " << state_;
+    if (state_ == kConnecting) {
+        int sockfd = removeAndResetChannel();
+        int err = sockets::getSocketError(sockfd);
+        if (err) {
+            LOG_WARN << "Connector::handleWrite - SO_ERROR = "
+                   << err << " " << strerror_tl(err);
+            retry(sockfd);
+        } else if (sockets::isSelfConnect(sockfd)) {
+            LOG_WARN << "Connector::handleWrite - Self connect";
+            retry(sockfd);
+        } else {      
+            if (connected_) {
+                setState(kConnected);
+                connectionCallback_(sockfd);
+            } else {
+                sockets::close(sockfd);
+                setState(kDisconnected);
+            }
         }
+    } else {
+        // don't know what happened
+        // even the connect is failed, poller still return on POLLOUT
+        assert(state_ == kDisconnected);
     }
 }
 
@@ -138,7 +145,7 @@ void Connector::retry(int sockfd) {
         LOG_INFO << "Connector::retry - Retry connecting to " << serverAddr_.toIpPort()
                  << " in " << retryDelayMs_<< " milliseconds. ";
         // make sure after few seconds the connector is still there
-        loop_->runAfter(retryDelayMs_, std::bind(&Connector::startInLoop, shared_from_this()));
+        loop_->runAfter(retryDelayMs_ / 1000.0, std::bind(&Connector::startInLoop, shared_from_this()));
         retryDelayMs_ = std::min(retryDelayMs_ * 2, kMaxRetryDelayMs);
     } else {
         LOG_DEBUG << "do not connect";

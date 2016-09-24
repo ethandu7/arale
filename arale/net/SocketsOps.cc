@@ -19,7 +19,7 @@ namespace sockets {
     
 void fromIpPort(const char * ip, uint16_t port, struct sockaddr_in6 * addr) {
     addr->sin6_family = AF_INET6;
-    addr->sin6_port = port;
+    addr->sin6_port = hostToNetwork16(port);
     if (inet_pton(AF_INET6, ip, &addr->sin6_addr) <= 0) {
         LOG_SYSERR << "sockets::fromIpPortv6";
     }
@@ -27,7 +27,7 @@ void fromIpPort(const char * ip, uint16_t port, struct sockaddr_in6 * addr) {
 
 void fromIpPort(const char * ip, uint16_t port, struct sockaddr_in * addr) {
     addr->sin_family = AF_INET;
-    addr->sin_port = port;
+    addr->sin_port = hostToNetwork16(port);
     if (inet_pton(AF_INET, ip, &addr->sin_addr) <= 0) {
         LOG_SYSERR << "sockets::fromIpPortv4";
     }

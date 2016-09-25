@@ -23,8 +23,8 @@ void TimeClient::connect() {
 }
 
 void TimeClient::onConnection(const TcpConnectionPtr &conn) {
-    LOG_INFO << "TimeClient - " << conn->remoteAddr().toIpPort() << " -> "
-                 << conn->localAddr().toIpPort() << " is "
+    LOG_INFO << "TimeClient - " << conn->localAddr().toIpPort() << " -> "
+                 << conn->remoteAddr().toIpPort() << " is "
                  << (conn->isConnected() ? "UP" : "DOWN");
     if (!conn->isConnected()) {
         loop_->quitLoop();

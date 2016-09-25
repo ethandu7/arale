@@ -97,7 +97,8 @@ Logger::Impl::Impl(LogLevel level, int savedErrno, const SourceFile& file, int l
 {
   formatTime();
   base::getCurrentThreadID();
-  stream_ << T(base::getThreadIDStr(), base::getThreadIDStrLen());
+  stream_ << T(base::getThreadIDStr(), base::getThreadIDStrLen()); 
+  stream_ << T(" ", 1);
   stream_ << T(LogLevelName[level], 6);
   if (savedErrno != 0)
   {

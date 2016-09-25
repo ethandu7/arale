@@ -93,7 +93,7 @@ void TcpClient::removeConnection(const TcpConnectionPtr &connection) {
     }
     loop_->postFuntor(std::bind(&TcpConnection::connectionDestroyed, connection));
     // if user shutdown explicitly, we don't retry
-    if (retry_ || connect_) {
+    if (retry_ && connect_) {
         LOG_INFO << "TcpClient::connect[" << name_ << "] - Reconnecting to "
                  << connector_->getServerAddress().toIpPort();
         connector_->restart();

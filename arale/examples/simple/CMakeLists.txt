@@ -10,3 +10,6 @@ target_link_libraries(simple_timeserver arale_net)
 
 add_executable(simple_timeclient time/TimeClient.cc time/Main_Client.cc)
 target_link_libraries(simple_timeclient arale_net)
+
+add_executable(simple_chargen chargen/Chargen.cc chargen/Main.cc)
+target_link_libraries(simple_chargen arale_net)

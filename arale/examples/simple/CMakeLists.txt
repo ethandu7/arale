@@ -11,5 +11,12 @@ target_link_libraries(simple_timeserver arale_net)
 add_executable(simple_timeclient time/TimeClient.cc time/Main_Client.cc)
 target_link_libraries(simple_timeclient arale_net)
 
-add_executable(simple_chargen chargen/Chargen.cc chargen/Main.cc)
-target_link_libraries(simple_chargen arale_net)
+add_executable(simple_chargenserver chargen/Chargen.cc chargen/Main.cc)
+target_link_libraries(simple_chargenserver arale_net)
+
+add_executable(simple_chargenclient chargen/ChargenClient.cc)
+target_link_libraries(simple_chargenclient arale_net)
+
+add_executable(simple_fileserver filetransfer/Download.cc)
+target_link_libraries(simple_fileserver arale_net)
+

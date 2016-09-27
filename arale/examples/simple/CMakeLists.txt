@@ -20,3 +20,9 @@ target_link_libraries(simple_chargenclient arale_net)
 add_executable(simple_fileserver filetransfer/Download.cc)
 target_link_libraries(simple_fileserver arale_net)
 
+add_executable(simple_fileserver2 filetransfer/Download2.cc)
+target_link_libraries(simple_fileserver2 arale_net)
+
+add_executable(simple_fileserver3 filetransfer/Download3.cc)
+target_link_libraries(simple_fileserver3 arale_net)
+

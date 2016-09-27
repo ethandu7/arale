@@ -9,7 +9,7 @@ using namespace arale;
 using namespace arale::net;
 using namespace arale::base;
 
-const char* g_file = NULL;
+static const char* g_file = NULL;
 
 std::string readFile(const char *fileName) {
     std::string content;

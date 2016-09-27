@@ -7,6 +7,8 @@
 #include <arale/net/Buffer.h>
 #include <arale/net/Socket.h>
 
+#include <boost/any.hpp>
+
 #include <string>
 #include <memory>
 
@@ -78,6 +80,9 @@ public:
 
     const char* stateToString() const;
     void setTcpNoDelay(bool on) { socket_->setTcpNoDelay(on); }
+
+    void setContext(const boost::any& context) { context_ = context; }
+    const boost::any& getContext() { return context_; }
     
 private:
     void handleRead(Timestamp receiveTime);
@@ -107,6 +112,7 @@ private:
     WriteCompleteCallback writeCompleteCallback_;
     HighWaterMarkCallback highWaterMarkCallback_;
     CloseCallback closeCallback_;
+    boost::any context_;
 };
 
 }

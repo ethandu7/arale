@@ -187,6 +187,19 @@ void TcpConnection::send(const std::string &msg) {
     send(msg.c_str(), msg.size());
 }
 
+void TcpConnection::send(Buffer * buf) {
+    if (state_ == kConnected) {
+        if (loop_->isInLoopThread()) {
+            sendInLoop(buf->peek(), buf->readableBytes());
+            buf->retrieveAll();
+        } else {
+            // the evaluation of the last argument will happen at this bind call time
+            loop_->runInLoop(std::bind(static_cast<void (TcpConnection::*)(const std::string &)>(&TcpConnection::send), 
+                                this, buf->retrieveAllAsString()));
+        }
+    }
+}
+
 void TcpConnection::sendInLoop(const void *data, size_t len) {
     loop_->assertInLoopThread();
     size_t left = len;

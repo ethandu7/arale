@@ -1,5 +1,5 @@
 
-#include <arale/base/CurrentThread.h>
+//#include <arale/base/CurrentThread.h>
 #include <arale/base/TimeStamp.h>
 #include <arale/net/EventLoop.h>
 #include <arale/net/Poller.h>

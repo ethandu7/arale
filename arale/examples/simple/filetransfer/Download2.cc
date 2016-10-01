@@ -55,7 +55,7 @@ void onWriteComplete(const TcpConnectionPtr &conn) {
         } else {
             fclose(fp);
             fp = NULL;
-            conn->setContext(NULL);
+            conn->setContext(fp);
             conn->shutdown();
             LOG_INFO << "FileServer - done";
         }

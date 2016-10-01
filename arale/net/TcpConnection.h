@@ -72,6 +72,7 @@ public:
 
     void send(const void* data, size_t len);
     void send(const std::string &msg);
+    void send(Buffer *buf);
     void shutdown();
     void startRead();
     void stopRead();

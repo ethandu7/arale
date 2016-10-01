@@ -54,6 +54,7 @@ private:
     }
     
     void onStringMessage(const TcpConnectionPtr &conn, const std::string &msg, Timestamp receiveTime) {
+        // can not use std::cout, it's not thread-safe
         printf("<<<%s\n", msg.c_str());
     }
     
@@ -77,7 +78,7 @@ int main(int argc, char *argv[]) {
         }
 
         client.disconnect();
-        // should use std::chrono;
+        // should use std::chrono
         sleep(1);
     } else {
         printf("Usage: %s host_ip\n", argv[0]);

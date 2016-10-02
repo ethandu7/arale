@@ -1,5 +1,4 @@
 
-#include <arale/base/Logging.h>
 #include <arale/net/EventLoop.h>
 #include <arale/net/TcpServer.h>
 
@@ -34,7 +33,7 @@ void onHighWaterMark(const TcpConnectionPtr &conn, size_t high) {
 }
 
 void onConnection(const TcpConnectionPtr &conn) {
-    LOG_INFO << "Chargen Server - " << conn->remoteAddr().toIpPort() << " -> "
+    LOG_INFO << "File Server - " << conn->remoteAddr().toIpPort() << " -> "
              << conn->localAddr().toIpPort() << " is "
              << (conn->isConnected() ? "UP" : "DOWN");
     if (conn->isConnected()) {

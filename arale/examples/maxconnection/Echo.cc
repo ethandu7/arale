@@ -31,6 +31,7 @@ void EchoServer::onConnection(const TcpConnectionPtr &conn) {
     if (conn->isConnected()) {
         ++numConnection_;
         if (numConnection_ > maxConnections_) {
+            // when we shutdown write, the connection is still there
             conn->shutdown();
             conn->forceCloseWithDelay(3.0);
         }

@@ -9,9 +9,6 @@
 
 #include <boost/any.hpp>
 
-#include <string>
-#include <memory>
-
 namespace arale {
 
 namespace net {

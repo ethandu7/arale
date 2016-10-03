@@ -10,6 +10,30 @@
 
 //#include <stdio.h>
 
+#define GCC_VERSION (__GNUC__ * 10000 \
+                     + __GNUC_MINOR__ * 100 \
+                     + __GNUC_PATCHLEVEL__)
+
+// gcc 4.7 is the first version to support all features of C++11 
+#if GCC_VERSION < 40700
+
+namespace std {
+
+// partial specialization for shared_ptr, which will be used in unordered_set
+template<typename T>
+class hash<shared_ptr<T> >  : public unary_function<shared_ptr<T>, size_t> {
+public:
+    // do NOT forget the const qualifier
+    size_t operator () (const std::shared_ptr<T> &ptr) const {
+        return hash<T *>()(ptr.get());
+    }
+};
+
+}
+
+#endif
+    
+
 class EchoServer {
 public:
     EchoServer(arale::net::EventLoop *, const arale::net::InetAddress &, int idleSeconds);

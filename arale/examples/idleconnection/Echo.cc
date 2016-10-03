@@ -17,6 +17,7 @@ EchoServer::EchoServer(EventLoop *loop, const InetAddress &addr, int idleConnnec
     server_.setConnectionCallback(std::bind(&EchoServer::onConnection, this, _1));
     server_.setMessageCallback(std::bind(&EchoServer::onMessage, this, _1, _2, _3));
     loop->runEvery(1.0, std::bind(&EchoServer::onTimer, this));
+    connections_.resize(idleConnneciton);
     dumpConnectionBuckets();
 }
 
@@ -80,11 +81,14 @@ void EchoServer::dumpConnectionBuckets() {
     LOG_INFO << "size = " << connections_.size();
     int idx = 0;
     for (auto it = connections_.begin(); it != connections_.end(); ++it, ++idx) {
-        Bucket bucket = *it;
+        // use reference here, or the whole bucekt will be copied
+        // if the bucket is big, this would be a time-consuming operation
+        Bucket &bucket = *it;
         printf("[%d] len = %zd : ", idx, bucket.size());
         for (auto it2 = bucket.begin(); it2 != bucket.end(); ++it2) {
             bool connectionDead = (*it2)->weakConn_.expired();
             printf("%p(%ld)%s, ", it2->get(), it2->use_count(), connectionDead ? "DEAD" : "");
+            //printf("%p(%ld), ", it2->get(), it2->use_count());
         }
         puts("");
     }

@@ -49,7 +49,7 @@ TcpConnection::TcpConnection(EventLoop *loop, const string &name, int sockfd,
 TcpConnection::~TcpConnection() {
     // a TcpConnection object can be destructed in a non io thread
     //loop_->assertInLoopThread();
-    LOG_DEBUG << "TcpConnection::dtor[" <<  name_ << "] at " << this
+    LOG_INFO << "TcpConnection::dtor[" <<  name_ << "] at " << this
             << " fd=" << readWriteChannel_->getfd()
             << " state=" << stateToString();
     assert(state_ == kDisconnected);

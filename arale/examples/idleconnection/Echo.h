@@ -8,6 +8,8 @@
 
 #include <unordered_set>
 
+//#include <stdio.h>
+
 class EchoServer {
 public:
     EchoServer(arale::net::EventLoop *, const arale::net::InetAddress &, int idleSeconds);
@@ -41,6 +43,18 @@ private:
         }
         
         WeakTcpConnectionPtr weakConn_;
+        
+        /*
+        ~Entry() {
+            long users = weakConn_.use_count();
+            printf("[Entry destructor] %ld\n", users);
+            if (users > 1) {
+                weakConn_->shutdown();
+            }
+        }
+
+        arale::net::TcpConnectionPtr weakConn_;
+        */
     };
     
     // we need shared_ptr to implement RAII

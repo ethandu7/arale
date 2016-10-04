@@ -10,14 +10,14 @@ using namespace arale;
 using namespace arale::net;
 using namespace arale::base;
 
-EchoServer::EchoServer(EventLoop *loop, const InetAddress &addr, int idleConnneciton) 
+EchoServer::EchoServer(EventLoop *loop, const InetAddress &addr, int idleSeconds) 
     : server_(loop, "Echo Server", addr),
-      connections_(idleConnneciton) {
+      connections_(idleSeconds) {
     using namespace std::placeholders;
     server_.setConnectionCallback(std::bind(&EchoServer::onConnection, this, _1));
     server_.setMessageCallback(std::bind(&EchoServer::onMessage, this, _1, _2, _3));
     loop->runEvery(1.0, std::bind(&EchoServer::onTimer, this));
-    connections_.resize(idleConnneciton);
+    connections_.resize(idleSeconds);
     dumpConnectionBuckets();
 }
 

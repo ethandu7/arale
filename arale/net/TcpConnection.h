@@ -81,6 +81,7 @@ public:
 
     void setContext(const boost::any& context) { context_ = context; }
     const boost::any& getContext() { return context_; }
+    boost::any* getMutableContext() { return &context_; }
     
 private:
     void handleRead(Timestamp receiveTime);

@@ -40,15 +40,17 @@ private:
                  << conn->localAddr().toIpPort() << " is "
                  << (conn->isConnected() ? "UP" : "DOWN");
 
+        // notice: the lock should guard the whole function
+        // since there is chance when we write the connection list while
+        // some other threads want to read this list
+        
         // if other thread is reading the conection list
         // we copy the list, then do insertion or erasure on the new copy
-        {
-            std::lock_guard<std::mutex> guard(mutex_);
-            if (!connections_.unique()) {
-                connections_.reset(new ConnectionList(*connections_));
-            }
-            assert(connections_.unique());
+        std::lock_guard<std::mutex> guard(mutex_);
+        if (!connections_.unique()) {
+            connections_.reset(new ConnectionList(*connections_));
         }
+        assert(connections_.unique());
 
         if (conn->isConnected()) {
             // there is a bug about source insight, -:)

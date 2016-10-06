@@ -10,3 +10,6 @@ target_link_libraries(asio_chatsever_threaded arale_net)
 
 add_executable(asio_chatsever_threaded_efficient ChatServerThreadedEfficient.cc)
 target_link_libraries(asio_chatsever_threaded_efficient arale_net)
+
+add_executable(asio_chatsever_threaded_highperformance ChatServerThreadedHighPerformance.cc)
+target_link_libraries(asio_chatsever_threaded_highperformance arale_net)

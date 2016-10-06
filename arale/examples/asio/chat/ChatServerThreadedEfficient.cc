@@ -18,23 +18,25 @@ class ChatServer {
 public:
     ChatServer(EventLoop *loop, const InetAddress &addr) 
             : server_(loop, "Chat Server", addr),
-              codec_(std::bind(&ChatServer::onMessage, this, _1, _2, _3)) {
-            server_.setConnectionCallback(std::bind(&ChatServer::onConnection, this, _1));
-            server_.setMessageCallback(std::bind(&LengthHeaderCodec::onMessage, &codec_, _1, _2, _3));
-        }
+              codec_(std::bind(&ChatServer::onMessage, this, _1, _2, _3)),
+              connections_(new ConnectionList) {
+        server_.setConnectionCallback(std::bind(&ChatServer::onConnection, this, _1));
+        server_.setMessageCallback(std::bind(&LengthHeaderCodec::onMessage, &codec_, _1, _2, _3));
+    }
     
-        void start() {
-            server_.start();
-        }
+    void start() {
+        server_.start();
+    }
 
-        void setThreadNum(int threadNum) {
-            server_.setThreadNum(threadNum);
-        }
+    void setThreadNum(int threadNum) {
+        server_.setThreadNum(threadNum);
+    }
 
 private:
+    // we don't have to put all typedef at the bgeinning any more
     typedef std::set<TcpConnectionPtr>  ConnectionList;
     typedef std::shared_ptr<ConnectionList> ConnectionListPtr;
-
+    
     void onConnection(const TcpConnectionPtr &conn) {
         LOG_INFO << "Chat Server - " << conn->remoteAddr().toIpPort() << " -> "
                  << conn->localAddr().toIpPort() << " is "
@@ -62,14 +64,26 @@ private:
 
     void onMessage(const TcpConnectionPtr &conn, const std::string &msg, Timestamp receiveTime) {
         // this will increase the reference count, which tells the writer we are reading
+
+        // wrong usage of shared_ptr
+        /*
         ConnectionListPtr connections;
         {
             std::lock_guard<std::mutex> guard(mutex_);
             connections == connections_;
         }
+        */
+        
+        // workround for shared_ptr
+        ConnectionListPtr connections = getConnectionList();
         for (auto it = connections->begin(); it != connections->end(); ++it) {
 	        codec_.sendMessage(*it, msg);
 	    }
+    }
+
+    ConnectionListPtr getConnectionList() {
+        std::lock_guard<std::mutex> guard(mutex_);
+        return connections_;
     }
     
     TcpServer server_;

@@ -34,6 +34,7 @@ public:
 private:
     typedef std::set<TcpConnectionPtr>  ConnectionList;
 
+    // this will be called in different thread, so we need a lock
     void onConnection(const TcpConnectionPtr &conn) {
         LOG_INFO << "Chat Server - " << conn->remoteAddr().toIpPort() << " -> "
                  << conn->localAddr().toIpPort() << " is "

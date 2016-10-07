@@ -35,6 +35,7 @@ public:
         assert(LocalConnections::pointer() == NULL);
         LocalConnections::instance();
         assert(LocalConnections::pointer() != NULL);
+        std::lock_guard<std::mutex> guard(mutex_);
         loops_.insert(loop);
     }
 
@@ -73,6 +74,7 @@ private:
     
     TcpServer server_;
     LengthHeaderCodec codec_;
+    // this is used to protect loops_
     std::mutex mutex_;
     std::set<EventLoop *> loops_;
 };

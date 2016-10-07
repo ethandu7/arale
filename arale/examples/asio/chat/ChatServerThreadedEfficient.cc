@@ -65,25 +65,15 @@ private:
     void onMessage(const TcpConnectionPtr &conn, const std::string &msg, Timestamp receiveTime) {
         // this will increase the reference count, which tells the writer we are reading
 
-        // wrong usage of shared_ptr
-        /*
         ConnectionListPtr connections;
         {
             std::lock_guard<std::mutex> guard(mutex_);
-            connections == connections_;
+            connections = connections_;
         }
-        */
-        
-        // workround for shared_ptr
-        ConnectionListPtr connections = getConnectionList();
+
         for (auto it = connections->begin(); it != connections->end(); ++it) {
 	        codec_.sendMessage(*it, msg);
 	    }
-    }
-
-    ConnectionListPtr getConnectionList() {
-        std::lock_guard<std::mutex> guard(mutex_);
-        return connections_;
     }
     
     TcpServer server_;

@@ -9,3 +9,5 @@ add_subdirectory(idleconnection)
 
 add_subdirectory(multiplexer)
 
+add_subdirectory(socks4a)
+

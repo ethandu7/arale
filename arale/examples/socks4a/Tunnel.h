@@ -15,13 +15,17 @@ public:
           serverConnection_(serverConn) {
         LOG_INFO << "Tunnel " << serverConn->remoteAddr().toIpPort()
              << " <-> " << serverAddr.toIpPort();
-        client_.setConnectionCallback(std::bind(&Tunnel::onClientConneciont, std::shared_from_this(), _1));
-        client_.setMessageCallback(std::bind(&Tunnel::onClientMessage, std::shared_from_this(), _1, _2, _3));
-        serverConnection_->setHighWaterMarkCallback(std::bind(&Tunnel::onHighWaterMarkWeak, std::weak<Tunnel>(std::shared_from_this()), _1, _2), 10 * 1024 * 1024);
     }
 
     ~Tunnel() {
         LOG_INFO << "~Tunnel";
+    }
+
+    // we have to do this here, not in the costruction of Tunnel object, because of shared_from_this
+    void setup() {
+        client_.setConnectionCallback(std::bind(&Tunnel::onClientConneciont, shared_from_this(), _1));
+        client_.setMessageCallback(std::bind(&Tunnel::onClientMessage, shared_from_this(), _1, _2, _3));
+        serverConnection_->setHighWaterMarkCallback(std::bind(&Tunnel::onHighWaterMarkWeak, std::weak_ptr<Tunnel>(shared_from_this()), _1, _2), 10 * 1024 * 1024);
     }
 
     void connect() {
@@ -48,10 +52,10 @@ private:
         LOG_DEBUG << (conn->isConnected() ? "UP" : "DOWN");
         if (conn->isConnected()) {
             conn->setTcpNoDelay(true);
-            conn->setHighWaterMarkCallback();
+            conn->setHighWaterMarkCallback(std::bind(&Tunnel::onHighWaterMarkWeak, std::weak_ptr<Tunnel>(shared_from_this()), _1, _2), 10 * 1024 * 1024);
             // 
             if (serverConnection_) {
-                // hold the connection to the other side
+                // when serverConnection_ get data, it needs this to send out data
                 serverConnection_->setContext(conn);
                 if (serverConnection_->getInputBuffer()->readableBytes() > 0) {
                     conn->send(serverConnection_->getInputBuffer());
@@ -83,9 +87,9 @@ private:
     }
 
     // if we use shared_ptr here, there will be a shared_ptr point to Tunnel object in serverConnnection_
-    // at them same time Tunnel object already has a shared_ptr point to serverConnection_
+    // Tunnel object already has a shared_ptr point to serverConnection_
     // classic circular reference
-    static void onHighWaterMarkWeak(const std::weak<Tunnel> &weakTunnel, const arale::net::TcpConnectionPtr &conn, size_t bytesToSent) {
+    static void onHighWaterMarkWeak(const std::weak_ptr<Tunnel> &weakTunnel, const arale::net::TcpConnectionPtr &conn, size_t bytesToSent) {
         std::shared_ptr<Tunnel> tunnel = weakTunnel.lock();
         if (tunnel) {
             tunnel->onHighWaterMark(conn, bytesToSent);
@@ -95,5 +99,7 @@ private:
     arale::net::TcpClient client_;
     arale::net::TcpConnectionPtr serverConnection_;
 };
+
+typedef std::shared_ptr<Tunnel> TunnelPtr;
 
 #endif

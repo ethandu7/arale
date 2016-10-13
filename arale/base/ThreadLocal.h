@@ -18,10 +18,10 @@ public:
     }
 
     T& getValue() {
-        T *preObj = pthread_get_specific(key_);
+        T *preObj = static_cast<T *>(pthread_getspecific(key_));
         if (preObj == NULL) {
             T *newObj = new T();
-            pthread_set_specific(key_, newObj);
+            pthread_setspecific(key_, newObj);
             preObj = newObj;
         }
         return *preObj;
@@ -37,7 +37,7 @@ private:
     }
     // if it's not a static variable, it should be a global variable
     // the point is that there should be only one key, and every thread should see the same key
-    pthread_key key_;
+    pthread_key_t key_;
 };
 
 }

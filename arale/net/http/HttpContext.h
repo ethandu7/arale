@@ -23,9 +23,8 @@ public:
 
     }
 
-    HttpContext(const HttpContext &) = delete;
-    HttpContext& operator=(const HttpContext &) = delete;
-
+    // default copy-ctor, dtor and assignment are fine
+    
     HttpRequest& getRequest() {
         return request_;
     }

@@ -51,7 +51,7 @@ public:
         headers_[header] = value;
     }
 
-    std::string getHeader(const std::string &header) {
+    std::string getHeader(const std::string &header) const {
         std::string res;
         auto it = headers_.find(header);
         if (it != headers_.end()) {
@@ -60,7 +60,7 @@ public:
         return res;
     }
 
-    const std::map<std::string, std::string>& getHeaders() {
+    const std::map<std::string, std::string>& getHeaders() const {
         return headers_;
     }
 
@@ -72,7 +72,7 @@ public:
         version_ = version;
     }
 
-    HttpVersion getVersion() {
+    HttpVersion getVersion() const {
         return version_;
     }
 
@@ -94,11 +94,11 @@ public:
         return method_ != kInvalid;
     }
 
-    HttpMethod getMethod() {
+    HttpMethod getMethod() const {
         return method_;
     }
 
-    const char* methodToString(HttpMethod method) {
+    const char* methodToString(HttpMethod method) const {
         const char *result = "UNKNOWN";
         switch (method) {
             case kGet:
@@ -126,7 +126,7 @@ public:
         path_.assign(start, end);
     }
 
-    const std::string& getPath() {
+    const std::string& getPath() const {
         return path_;
     }
 
@@ -134,7 +134,7 @@ public:
         query_.assign(start, end);
     }
 
-    const std::string& getQuery() {
+    const std::string& getQuery() const {
         return query_;
     }
     

@@ -57,7 +57,7 @@ public:
     //////////////////////////////////////////////////////////////////
     size_t readableBytes() { return writeIndex_ - readIndex_; }
     
-    char* peek() { return begin() + readIndex_; }
+    const char* peek() const { return begin() + readIndex_; }
 
     void retrieveAll() {
         readIndex_ = writeIndex_ = kCheapPrependSize;
@@ -156,6 +156,7 @@ public:
 
     size_t writableBytes() { return buffer_.size() - writeIndex_; }
     
+    const char* beginWrite() const { return begin() + writeIndex_; }
     char* beginWrite() { return begin() + writeIndex_; }
 
     void hasWritten(size_t len) {
@@ -234,9 +235,15 @@ public:
         prepend(&be64, sizeof(be64));
     }
 
+    const char* findCRLF() const {
+        const char* crlf = std::search(peek(), beginWrite(), kCRLF, kCRLF + 2);
+        return crlf == beginWrite() ? NULL : crlf;
+    }
+
 private:
     // don't return iterator
     char* begin() { return &*buffer_.begin(); }
+    const char*  begin() const { return &*buffer_.begin(); }
     
     void makeSpace(size_t len) {
         if (writableBytes() + kCheapPrependSize >= len) {

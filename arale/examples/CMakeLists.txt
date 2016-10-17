@@ -11,3 +11,5 @@ add_subdirectory(multiplexer)
 
 add_subdirectory(socks4a)
 
+add_subdirectory(shorturl)
+

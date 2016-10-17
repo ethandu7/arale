@@ -51,10 +51,11 @@ void HttpServer::onMessage(const TcpConnectionPtr &conn, Buffer *buf, Timestamp 
         // if we didn't get everything, leave data in buffer and handle them next round
         if (context->isGotAll()) {
             onRequest(conn, context->getRequest());
+            context->reset();
         }
     } else {
         conn->send("HTTP/1.1 400 Bad Request\r\n\r\n");
-        context->reset();
+        conn->shutdown();
     }
 }
 

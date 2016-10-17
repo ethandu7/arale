@@ -98,9 +98,9 @@ public:
         return method_;
     }
 
-    const char* methodToString(HttpMethod method) const {
+    const char* methodToString() const {
         const char *result = "UNKNOWN";
-        switch (method) {
+        switch (method_) {
             case kGet:
                 result = "GET";
                 break;

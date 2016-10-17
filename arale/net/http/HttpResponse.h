@@ -14,10 +14,10 @@ class HttpResponse {
 public:
     enum HttpStatusCode {
         kUnknown,
-        k200Ok,
-        k301MovedPermanently,
-        k400BadRequest,
-        k404NotFound
+        k200Ok = 200,
+        k301MovedPermanently = 301,
+        k400BadRequest = 400,
+        k404NotFound = 404
     };
 
     explicit HttpResponse(bool close)
